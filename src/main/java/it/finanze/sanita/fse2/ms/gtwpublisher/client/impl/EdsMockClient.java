@@ -28,10 +28,10 @@ public class EdsMockClient implements IEdsClient {
 	private static final String EDS_FORCE_EXCEPTION = "eds_force_exception";
 	
 	@Override
-	public Boolean sendData(final String transactionId) {
+	public Boolean sendData(final String workflowInstanceId) {
 		log.warn("ATTENZIONE : Si sta chiamando il client mockato . Assicurarsi che sia voluto");
 		Boolean output = true;
-		if(transactionId.trim().contains(EDS_FORCE_EXCEPTION)) {
+		if(workflowInstanceId.trim().contains(EDS_FORCE_EXCEPTION)) {
 			throw new BusinessException("Eccezione di test");
 		}
 		return output;

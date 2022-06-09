@@ -25,5 +25,25 @@ public class KafkaTopicCFG {
 	 */
 	@Value("${kafka.indexer-publisher.deadletter.topic}")
 	private String indexerPublisherDeadLetterTopic;
+
+
+	/**
+	 * Topic.
+	 */
+	@Value("${kafka.dispatcher-publisher.topic}")
+	private String dispatcherPublisherTopic;
+	
+	/**
+	 * Dead letter topic.
+	 */
+	@Value("${kafka.dispatcher-publisher.deadletter.topic}")
+	private String dispatcherPublisherDeadLetterTopic;
+	
+	
+	/**
+	 * Status Manager topic.
+	 */
+	@Value("${kafka.statusmanager.topic}")
+	private String statusManagerTopic;
 		
 }

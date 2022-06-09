@@ -24,15 +24,15 @@ public class EdsInvocationRepo implements IEdsInvocationRepo {
 	private MongoTemplate mongoTemplate;
 
 	@Override
-	public IniEdsInvocationETY findByTransactionId(final String transactionId) {
+	public IniEdsInvocationETY findByWorkflowInstanceId(final String workflowInstanceId) {
 		IniEdsInvocationETY out = null;
 		try {
 			Query query = new Query();
-			query.addCriteria(Criteria.where("transaction_id").is(transactionId));
+			query.addCriteria(Criteria.where("workflow_instance_id").is(workflowInstanceId));
 			out = mongoTemplate.findOne(query, IniEdsInvocationETY.class);
 		} catch(Exception ex) {
-			log.error("Error while running find by transaction id query : " , ex);
-			throw new BusinessException("Error while running find by transaction id query : " , ex);
+			log.error("Error while running find by workflow instance id query : " , ex);
+			throw new BusinessException("Error while running find by workflow instance id query : " , ex);
 		}
 		return out;
 	}

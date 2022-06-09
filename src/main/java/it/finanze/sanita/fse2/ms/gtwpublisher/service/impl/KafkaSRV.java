@@ -1,5 +1,8 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.service.impl;
 
+import java.util.Date;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -12,8 +15,15 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaPropertiesCFG;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaMessageDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaStatusManagerDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ErrorLogEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.OperationLogEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.gtwpublisher.logging.ElasticLoggerHelper;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IEdsInvocationSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.EncryptDecryptUtility;
@@ -56,6 +66,12 @@ public class KafkaSRV implements IKafkaSRV {
 	@Autowired
 	private IEdsInvocationSRV edsInvocationSRV;
 	
+	@Autowired
+	private KafkaTopicCFG kafkaTopicCFG;
+
+	@Autowired
+	private ElasticLoggerHelper elasticLogger;
+	
 	@Override
 	public RecordMetadata sendMessage(String topic, String key, String value, boolean trans) {
 		RecordMetadata out = null;
@@ -95,22 +111,85 @@ public class KafkaSRV implements IKafkaSRV {
 	}
 
 	@Override
-	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic}'}",  clientIdPrefix = "#{'${kafka.consumer.client-id}'}", containerFactory = "kafkaListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id}'}")
-	public void listener(final ConsumerRecord<String, String> cr, final MessageHeaders messageHeaders) {
+	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic}'}",  clientIdPrefix = "#{'${kafka.consumer.client-id-indexer}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
+	public void listenerIndexer(final ConsumerRecord<String, String> cr, final MessageHeaders messageHeaders) {
+
+		Date startDateOperation = new Date();
+
 		String message = cr.value();
 		log.info("Consuming Transaction Event - Message received with key {}", cr.key());
+		String workflowInstanceId = "";
 
+		EventTypeEnum eventType = null;
 		try {
-			String transactionId = EncryptDecryptUtility.decryptObject(kafkaPropCFG.getCrypto(), message, String.class);
-			
-			if(!StringUtility.isNullOrEmpty(transactionId)) {
-				System.out.println("TRANSACTION ID FROM INDEXER: " + transactionId);
-				Boolean sendToEdsCompleted = edsInvocationSRV.findAndSendToEdsByTransactionId(transactionId);
+			workflowInstanceId = EncryptDecryptUtility.decryptObject(kafkaPropCFG.getCrypto(), message, String.class);
+
+			if(!StringUtility.isNullOrEmpty(workflowInstanceId)) {
+				log.info("WORKFLOW INSTANCE ID FROM INDEXER: " + workflowInstanceId);
+				Boolean sendToEdsCompleted = edsInvocationSRV.findAndSendToEdsByWorkflowInstanceId(workflowInstanceId);
+				eventType = EventTypeEnum.SEND_TO_EDS;
+				if(Boolean.TRUE.equals(sendToEdsCompleted)) {
+					sendStatusMessage(workflowInstanceId, eventType , EventStatusEnum.SUCCESS,null);
+				}
+			} else {
+				log.warn("Error consuming Kafka Event with key {}: null received", cr.key());
+				elasticLogger.error("Error consuming Kafka Event with key " + cr.key() + ": null received", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation, ErrorLogEnum.KO_EDS);
+
+			}
+
+			elasticLogger.info("Successfully sent data to EDS for workflow instance id " + workflowInstanceId, OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
+
+		} catch (Exception e) {
+			if(eventType == null) {
+				eventType = EventTypeEnum.GENERIC_ERROR;
+			}
+
+			elasticLogger.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation, ErrorLogEnum.KO_EDS);
+
+			sendStatusMessage(workflowInstanceId, eventType, EventStatusEnum.ERROR,ExceptionUtils.getStackTrace(e));
+			deadLetterHelper(e);
+			throw new BusinessException(e);
+		}
+	}
+
+
+
+	@Override
+	@KafkaListener(topics = "#{'${kafka.dispatcher-publisher.topic}'}",  clientIdPrefix = "#{'${kafka.consumer.client-id-dispatcher}'}", containerFactory = "kafkaDispatcherListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-dispatcher}'}")
+	public void listenerDispatcher(final ConsumerRecord<String, String> cr, final MessageHeaders messageHeaders) {
+
+		Date startDateOperation = new Date();
+
+		String message = cr.value();
+		log.info("Consuming Transaction Event - Message received with key {}", cr.key());
+		String workflowInstanceId = "";
+
+		EventTypeEnum eventType = null;
+		try {
+			workflowInstanceId = EncryptDecryptUtility.decryptObject(kafkaPropCFG.getCrypto(), message, String.class);
+
+			if(!StringUtility.isNullOrEmpty(workflowInstanceId)) {
+				log.info("WORKFLOW INSTANCE ID FROM DISPATCHER: " + workflowInstanceId);
+				Boolean sendToEdsCompleted = edsInvocationSRV.findAndSendToEdsByWorkflowInstanceId(workflowInstanceId);
+				eventType = EventTypeEnum.SEND_TO_EDS;
+				if(Boolean.TRUE.equals(sendToEdsCompleted)) {
+					sendStatusMessage(workflowInstanceId, eventType , EventStatusEnum.SUCCESS,null);
+				}
 			} else {
 				log.warn("Error consuming Validation Event with key {}: null received", cr.key());
 			}
 
+			elasticLogger.info("Successfully sent data to EDS for workflow instance id " + workflowInstanceId, OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
+
+
 		} catch (Exception e) {
+			if(eventType == null) {
+				eventType = EventTypeEnum.GENERIC_ERROR;
+			}
+
+			elasticLogger.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation, ErrorLogEnum.KO_EDS);
+
+			sendStatusMessage(workflowInstanceId, eventType, EventStatusEnum.ERROR,ExceptionUtils.getStackTrace(e));
 			deadLetterHelper(e);
 			throw new BusinessException(e);
 		}
@@ -145,5 +224,23 @@ public class KafkaSRV implements IKafkaSRV {
 		log.error("{}", sb.toString());
 	}
 
+	@Override
+	public void sendStatusMessage(final String workflowInstanceId,final EventTypeEnum eventType,
+			final EventStatusEnum eventStatus, String exception) {
+		try {
+			KafkaStatusManagerDTO statusManagerMessage = KafkaStatusManagerDTO.builder().
+					eventType(eventType).
+					eventDate(new Date()).
+					eventStatus(eventStatus).
+					exception(exception).
+					build();
+			String json = StringUtility.toJSONJackson(statusManagerMessage);
+			String cryptoMessage = EncryptDecryptUtility.encryptObject(kafkaPropCFG.getCrypto(), json);
+			sendMessage(kafkaTopicCFG.getStatusManagerTopic(), workflowInstanceId, cryptoMessage, true);
+		} catch(Exception ex) {
+			log.error("Error while send status message on indexer : " , ex);
+			throw new BusinessException(ex);
+		}
+	}
 
 }

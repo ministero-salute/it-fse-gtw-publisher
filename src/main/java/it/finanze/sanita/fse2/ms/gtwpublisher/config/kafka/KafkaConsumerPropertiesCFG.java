@@ -23,16 +23,29 @@ public class KafkaConsumerPropertiesCFG implements Serializable {
 	private static final long serialVersionUID = 4863316988401046567L;
 
 	/**
-	 * Client id.
+	 * Client id indexer.
 	 */
-	@Value("${kafka.consumer.client-id}")
-	private String clientId;
+	@Value("${kafka.consumer.client-id-indexer}")
+	private String clientIdIndexer;
 
 	/**
-	 * Group id consumer.
+	 * Group id consumer indexer.
 	 */
-	@Value("${kafka.consumer.group-id}")
-	private String consumerGroupId;
+	@Value("${kafka.consumer.group-id-indexer}")
+	private String consumerGroupIdIndexer;
+
+
+	/**
+	 * Client id dispatcher.
+	 */
+	@Value("${kafka.consumer.client-id-dispatcher}")
+	private String clientIdDispatcher;
+
+	/**
+	 * Group id consumer dispather.
+	 */
+	@Value("${kafka.consumer.group-id-dispatcher}")
+	private String consumerGroupIdDispatcher;
 
 	/**
 	 * Consumer key deserializer.

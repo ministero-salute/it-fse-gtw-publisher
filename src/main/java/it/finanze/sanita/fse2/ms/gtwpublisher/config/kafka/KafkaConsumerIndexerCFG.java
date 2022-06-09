@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Configuration
-public class KafkaConsumerCFG {
+public class KafkaConsumerIndexerCFG {
 
 	/**
 	 *	Kafka consumer properties.
@@ -42,17 +42,17 @@ public class KafkaConsumerCFG {
 	 * @return	configurazione consumer
 	 */
 	@Bean
-	public Map<String, Object> consumerConfigs() {
+	public Map<String, Object> consumerConfigsIndexer() {
 		Map<String, Object> props = new HashMap<>();
 		
-		log.info("CLIENT_ID_CONFIG: " + kafkaConsumerPropCFG.getClientId());
-		props.put(ConsumerConfig.CLIENT_ID_CONFIG, kafkaConsumerPropCFG.getClientId());
+		log.info("CLIENT_ID_CONFIG: " + kafkaConsumerPropCFG.getClientIdIndexer());
+		props.put(ConsumerConfig.CLIENT_ID_CONFIG, kafkaConsumerPropCFG.getClientIdIndexer());
 		
 		log.info("BOOTSTRAP_SERVERS_CONFIG: " + kafkaConsumerPropCFG.getConsumerBootstrapServers());
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConsumerPropCFG.getConsumerBootstrapServers());
 		
-		log.info("GROUP_ID_CONFIG: " + kafkaConsumerPropCFG.getConsumerGroupId());
-		props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConsumerPropCFG.getConsumerGroupId());
+		log.info("GROUP_ID_CONFIG: " + kafkaConsumerPropCFG.getConsumerGroupIdIndexer());
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConsumerPropCFG.getConsumerGroupIdIndexer());
 		
 		log.info("KEY_DESERIALIZER_CLASS_CONFIG: " + kafkaConsumerPropCFG.getConsumerKeyDeserializer());
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, kafkaConsumerPropCFG.getConsumerKeyDeserializer());
@@ -87,8 +87,8 @@ public class KafkaConsumerCFG {
 	 * @return	factory
 	 */
 	@Bean
-	public ConsumerFactory<String, String> consumerFactory() {
-		return new DefaultKafkaConsumerFactory<>(consumerConfigs());
+	public ConsumerFactory<String, String> consumerFactoryIndexer() {
+		return new DefaultKafkaConsumerFactory<>(consumerConfigsIndexer());
 	}
 
 	/**
@@ -98,9 +98,9 @@ public class KafkaConsumerCFG {
 	 * @return	factory
 	 */
 	@Bean
-	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerDeadLetterContainerFactory(final @Qualifier("notxkafkadeadtemplate") KafkaTemplate<Object, Object> deadLetterKafkaTemplate) {
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaIndexerListenerDeadLetterContainerFactory(final @Qualifier("notxkafkadeadtemplate") KafkaTemplate<Object, Object> deadLetterKafkaTemplate) {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(consumerFactory());
+		factory.setConsumerFactory(consumerFactoryIndexer());
 		
 		// Definizione nome topic deadLetter
 		log.info("TOPIC: " + kafkaTopicCFG.getIndexerPublisherDeadLetterTopic());
@@ -109,7 +109,7 @@ public class KafkaConsumerCFG {
 		// Set classificazione errori da gestire per la deadLetter.
 		DefaultErrorHandler sceh = new DefaultErrorHandler(dlpr, new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS));
 		
-		log.info("setClassification - kafkaListenerDeadLetterContainerFactory: ");
+		log.info("setClassification - kafkaIndexerListenerDeadLetterContainerFactory: ");
 		setClassification(sceh);
 		
 		// da eliminare se non si volesse gestire la dead letter
@@ -155,9 +155,9 @@ public class KafkaConsumerCFG {
 	 * @return				factory
 	 */
 	@Bean
-	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory(final @Qualifier("notxkafkatemplate") KafkaTemplate<String, String> kafkaTemplate) {
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactoryIndexer(final @Qualifier("notxkafkatemplate") KafkaTemplate<String, String> kafkaTemplate) {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-		factory.setConsumerFactory(consumerFactory());
+		factory.setConsumerFactory(consumerFactoryIndexer());
 		
 		return factory;
 	}

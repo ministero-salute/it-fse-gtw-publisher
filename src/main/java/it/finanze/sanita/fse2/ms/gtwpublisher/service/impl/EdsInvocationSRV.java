@@ -22,14 +22,14 @@ public class EdsInvocationSRV implements IEdsInvocationSRV {
 	private IEdsClient edsClient;
 	
 	@Override
-	public Boolean findAndSendToEdsByTransactionId(final String transactionId) {
+	public Boolean findAndSendToEdsByWorkflowInstanceId(final String workflowInstanceId) {
 		Boolean out = false;
 		try {
-			IniEdsInvocationETY iniInvocationETY = edsInvocationRepo.findByTransactionId(transactionId);
+			IniEdsInvocationETY iniInvocationETY = edsInvocationRepo.findByWorkflowInstanceId(workflowInstanceId);
 			out = true;
-			edsClient.sendData(transactionId);
+			edsClient.sendData(workflowInstanceId);
 		} catch(Exception ex) {
-			log.error("Error while running find and send to eds by transactioin id : " , ex);
+			log.error("Error while running find and send to eds by workflow instance id : " , ex);
 			throw new BusinessException(ex);
 		}
 		return out;

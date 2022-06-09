@@ -6,6 +6,10 @@ import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
@@ -116,5 +120,19 @@ public final class StringUtility {
 	}
 
  
+	public static String toJSONJackson(final Object obj) {
+		String out = "";
+		try {
+			ObjectMapper objectMapper = new ObjectMapper(); 
+			objectMapper.registerModule(new JavaTimeModule());
+			objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+			objectMapper.setSerializationInclusion(Include.NON_NULL);
+			out = objectMapper.writeValueAsString(obj);
+		} catch(Exception ex) {
+			log.error("Error while running to json jackson");
+			throw new BusinessException(ex);
+		}
+		return out; 
+	}
 
 }
