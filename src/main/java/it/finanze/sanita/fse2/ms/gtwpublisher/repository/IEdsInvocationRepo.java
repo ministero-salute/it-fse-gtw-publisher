@@ -6,5 +6,5 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.repository.entity.IniEdsInvocation
 
 public interface IEdsInvocationRepo extends Serializable {
 
-	IniEdsInvocationETY findByWorkflowInstanceId(String workflowInstanceId);
+	IniEdsInvocationETY findByTransactionId(String transactionID);
 }

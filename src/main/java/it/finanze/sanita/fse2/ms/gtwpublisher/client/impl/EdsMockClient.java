@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
+@Profile(Constants.Profile.DEV)
 public class EdsMockClient implements IEdsClient {
 
     /**
@@ -27,10 +28,10 @@ public class EdsMockClient implements IEdsClient {
 	private static final String EDS_FORCE_EXCEPTION = "eds_force_exception";
 	
 	@Override
-	public Boolean sendData(final String workflowInstanceId) {
+	public Boolean sendData(final String transactionId) {
 		log.warn("ATTENZIONE : Si sta chiamando il client mockato . Assicurarsi che sia voluto");
 		Boolean output = true;
-		if(workflowInstanceId.trim().contains(EDS_FORCE_EXCEPTION)) {
+		if(transactionId.trim().contains(EDS_FORCE_EXCEPTION)) {
 			throw new BusinessException("Eccezione di test");
 		}
 		return output;

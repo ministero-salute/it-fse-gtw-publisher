@@ -8,5 +8,5 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.client;
  */
 public interface IEdsClient {
 
-    Boolean sendData(String workflowInstanceId);
+    Boolean sendData(String transactionId);
 }

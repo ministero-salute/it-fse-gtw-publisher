@@ -120,6 +120,12 @@ public final class StringUtility {
 	}
 
  
+	/**
+	 * Transformation from Object to Json.
+	 * 
+	 * @param obj	object to transform
+	 * @return		json
+	 */
 	public static String toJSONJackson(final Object obj) {
 		String out = "";
 		try {

@@ -118,18 +118,18 @@ public class KafkaSRV implements IKafkaSRV {
 
 		String message = cr.value();
 		log.info("Consuming Transaction Event - Message received with key {}", cr.key());
-		String workflowInstanceId = "";
+		String transactionId = "";
 
 		EventTypeEnum eventType = null;
 		try {
-			workflowInstanceId = EncryptDecryptUtility.decryptObject(kafkaPropCFG.getCrypto(), message, String.class);
+			transactionId = EncryptDecryptUtility.decryptObject(kafkaPropCFG.getCrypto(), message, String.class);
 
-			if(!StringUtility.isNullOrEmpty(workflowInstanceId)) {
-				log.info("WORKFLOW INSTANCE ID FROM INDEXER: " + workflowInstanceId);
-				Boolean sendToEdsCompleted = edsInvocationSRV.findAndSendToEdsByWorkflowInstanceId(workflowInstanceId);
+			if(!StringUtility.isNullOrEmpty(transactionId)) {
+				log.info("TRANSACTION ID FROM INDEXER: " + transactionId);
+				Boolean sendToEdsCompleted = edsInvocationSRV.findAndSendToEdsByTransactionId(transactionId);
 				eventType = EventTypeEnum.SEND_TO_EDS;
 				if(Boolean.TRUE.equals(sendToEdsCompleted)) {
-					sendStatusMessage(workflowInstanceId, eventType , EventStatusEnum.SUCCESS,null);
+					sendStatusMessage(transactionId, eventType , EventStatusEnum.SUCCESS,null);
 				}
 			} else {
 				log.warn("Error consuming Kafka Event with key {}: null received", cr.key());
@@ -137,7 +137,7 @@ public class KafkaSRV implements IKafkaSRV {
 
 			}
 
-			elasticLogger.info("Successfully sent data to EDS for workflow instance id " + workflowInstanceId, OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
+			elasticLogger.info("Successfully sent data to EDS for transactionId " + transactionId, OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
 
 		} catch (Exception e) {
 			if(eventType == null) {
@@ -146,7 +146,7 @@ public class KafkaSRV implements IKafkaSRV {
 
 			elasticLogger.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation, ErrorLogEnum.KO_EDS);
 
-			sendStatusMessage(workflowInstanceId, eventType, EventStatusEnum.ERROR,ExceptionUtils.getStackTrace(e));
+			sendStatusMessage(transactionId, eventType, EventStatusEnum.ERROR,ExceptionUtils.getStackTrace(e));
 			deadLetterHelper(e);
 			throw new BusinessException(e);
 		}
@@ -162,24 +162,24 @@ public class KafkaSRV implements IKafkaSRV {
 
 		String message = cr.value();
 		log.info("Consuming Transaction Event - Message received with key {}", cr.key());
-		String workflowInstanceId = "";
+		String transactionId = "";
 
 		EventTypeEnum eventType = null;
 		try {
-			workflowInstanceId = EncryptDecryptUtility.decryptObject(kafkaPropCFG.getCrypto(), message, String.class);
+			transactionId = EncryptDecryptUtility.decryptObject(kafkaPropCFG.getCrypto(), message, String.class);
 
-			if(!StringUtility.isNullOrEmpty(workflowInstanceId)) {
-				log.info("WORKFLOW INSTANCE ID FROM DISPATCHER: " + workflowInstanceId);
-				Boolean sendToEdsCompleted = edsInvocationSRV.findAndSendToEdsByWorkflowInstanceId(workflowInstanceId);
+			if(!StringUtility.isNullOrEmpty(transactionId)) {
+				log.info("TRANSACTION ID FROM DISPATCHER: " + transactionId);
+				Boolean sendToEdsCompleted = edsInvocationSRV.findAndSendToEdsByTransactionId(transactionId);
 				eventType = EventTypeEnum.SEND_TO_EDS;
 				if(Boolean.TRUE.equals(sendToEdsCompleted)) {
-					sendStatusMessage(workflowInstanceId, eventType , EventStatusEnum.SUCCESS,null);
+					sendStatusMessage(transactionId, eventType , EventStatusEnum.SUCCESS,null);
 				}
 			} else {
 				log.warn("Error consuming Validation Event with key {}: null received", cr.key());
 			}
 
-			elasticLogger.info("Successfully sent data to EDS for workflow instance id " + workflowInstanceId, OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
+			elasticLogger.info("Successfully sent data to EDS for transactionId " + transactionId, OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
 
 
 		} catch (Exception e) {
@@ -189,7 +189,7 @@ public class KafkaSRV implements IKafkaSRV {
 
 			elasticLogger.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation, ErrorLogEnum.KO_EDS);
 
-			sendStatusMessage(workflowInstanceId, eventType, EventStatusEnum.ERROR,ExceptionUtils.getStackTrace(e));
+			sendStatusMessage(transactionId, eventType, EventStatusEnum.ERROR,ExceptionUtils.getStackTrace(e));
 			deadLetterHelper(e);
 			throw new BusinessException(e);
 		}
@@ -225,7 +225,7 @@ public class KafkaSRV implements IKafkaSRV {
 	}
 
 	@Override
-	public void sendStatusMessage(final String workflowInstanceId,final EventTypeEnum eventType,
+	public void sendStatusMessage(final String transactionId,final EventTypeEnum eventType,
 			final EventStatusEnum eventStatus, String exception) {
 		try {
 			KafkaStatusManagerDTO statusManagerMessage = KafkaStatusManagerDTO.builder().
@@ -236,7 +236,7 @@ public class KafkaSRV implements IKafkaSRV {
 					build();
 			String json = StringUtility.toJSONJackson(statusManagerMessage);
 			String cryptoMessage = EncryptDecryptUtility.encryptObject(kafkaPropCFG.getCrypto(), json);
-			sendMessage(kafkaTopicCFG.getStatusManagerTopic(), workflowInstanceId, cryptoMessage, true);
+			sendMessage(kafkaTopicCFG.getStatusManagerTopic(), transactionId, cryptoMessage, true);
 		} catch(Exception ex) {
 			log.error("Error while send status message on indexer : " , ex);
 			throw new BusinessException(ex);
