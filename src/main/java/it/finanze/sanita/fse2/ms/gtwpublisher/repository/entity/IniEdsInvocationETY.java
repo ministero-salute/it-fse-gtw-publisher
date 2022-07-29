@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 /**
  * Model to save ini and eds invocation info.
  */
-@Document(collection = "ini_eds_invocation")
+@Document(collection = "#{@iniEdsInvocationBean}")
 @Data
 @NoArgsConstructor
 public class IniEdsInvocationETY {

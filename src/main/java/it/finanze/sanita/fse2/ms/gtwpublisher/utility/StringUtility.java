@@ -1,7 +1,9 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.utility;
 
 import java.security.MessageDigest;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.commons.codec.binary.Hex;
@@ -123,9 +125,11 @@ public final class StringUtility {
 	public static String toJSONJackson(final Object obj) {
 		String out = "";
 		try {
-			ObjectMapper objectMapper = new ObjectMapper(); 
+			final ObjectMapper objectMapper = new ObjectMapper(); 
 			objectMapper.registerModule(new JavaTimeModule());
 			objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+			objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+			objectMapper.setTimeZone(TimeZone.getDefault());
 			objectMapper.setSerializationInclusion(Include.NON_NULL);
 			out = objectMapper.writeValueAsString(obj);
 		} catch(Exception ex) {

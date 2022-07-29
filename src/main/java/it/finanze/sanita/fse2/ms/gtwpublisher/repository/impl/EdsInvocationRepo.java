@@ -21,7 +21,7 @@ public class EdsInvocationRepo implements IEdsInvocationRepo {
 	private static final long serialVersionUID = 7040678303037387997L;
 
 	@Autowired
-	private MongoTemplate mongoTemplate;
+	private transient MongoTemplate mongoTemplate;
 
 	@Override
 	public IniEdsInvocationETY findByWorkflowInstanceId(final String workflowInstanceId) {

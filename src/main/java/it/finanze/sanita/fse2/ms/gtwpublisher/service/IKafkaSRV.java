@@ -23,19 +23,54 @@ public interface IKafkaSRV extends Serializable {
 	RecordMetadata sendMessage(String topic, String key, String value, boolean trans);
  
 	/**
-	 * Kafka listener for Indexer communications
+	 * Kafka listener for Indexer communications in low priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void listenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+	void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
 
 	/**
-	 * Kafka listener for Dispatcher communications
+	 * Kafka listener for Indexer communications in medium priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void listenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
-	
+	void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+
+	/**
+	 * Kafka listener for Indexer communications in high priority
+	 * @param cr
+	 * @param messageHeaders
+	 */
+	void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+
+	/**
+	 * Kafka listener for Dispatcher communications for TSFeeding in low priority
+	 * @param cr
+	 * @param messageHeaders
+	 */
+	void lowPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+
+	/**
+	 * Kafka listener for Dispatcher communications for TSFeeding in medium priority
+	 * @param cr
+	 * @param messageHeaders
+	 */
+	void mediumPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+
+	/**
+	 * Kafka listener for Dispatcher communications for TSFeeding in high priority
+	 * @param cr
+	 * @param messageHeaders
+	 */
+	void highPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+
+	/**
+	 * Send status message to respective topic
+	 * @param workflowInstanceId
+	 * @param eventType
+	 * @param eventStatus
+	 * @param exception
+	 */
 	void sendStatusMessage(String workflowInstanceId,EventTypeEnum eventType,EventStatusEnum eventStatus, String exception);
 	
 }

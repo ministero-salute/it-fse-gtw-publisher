@@ -3,8 +3,7 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
 
 public enum EventTypeEnum {
 
-	SEND_TO_EDS("Send to eds"), 
-	GENERIC_ERROR("Generic error from publisher");
+	SEND_TO_EDS("SEND_TO_EDS");
 
 	private String name;
 

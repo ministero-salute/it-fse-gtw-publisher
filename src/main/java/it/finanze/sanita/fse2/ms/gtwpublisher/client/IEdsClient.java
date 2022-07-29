@@ -1,12 +1,19 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.client;
- 
+
+import java.io.Serializable;
+
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
+
 
 /**
  * Interface of Eds client.
  * 
- * @author vincenzoingenito
+ * @author Riccardo Bonesi
  */
-public interface IEdsClient {
+public interface IEdsClient extends Serializable {
 
-    Boolean sendData(String workflowInstanceId);
+    EdsPublicationResponseDTO sendData(String workflowInstanceId);
+
+    EdsPublicationResponseDTO sendUpdateData(IndexerValueDTO valueInfo);
 }
