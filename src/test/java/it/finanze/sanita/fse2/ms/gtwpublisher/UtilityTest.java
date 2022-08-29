@@ -1,7 +1,9 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,11 +19,15 @@ import org.springframework.test.context.ActiveProfiles;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.DocumentResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.LogTraceInfoDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.ResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.CurrentApplicationLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ErrorLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.JsonUtility;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,8 +39,15 @@ import lombok.NoArgsConstructor;
 @ActiveProfiles(Constants.Profile.TEST)
 class UtilityTest {
 	
+	public static final String TEST_MESSAGE = "test"; 
+	
+	public static final String TEST_SPAN_ID = "testSpanId"; 
+	public static final String TEST_TRACE_ID = "testTraceId"; 
+
+	
+	
 	@Autowired
-	private IEdsClient edsClient;
+	private IEdsClient edsClient; 
 	
 	@Test
 	@DisplayName("enumeration test ")
@@ -146,7 +159,43 @@ class UtilityTest {
 	void toJSONJacksonTest() {
 		KafkaMessageDTO msg = new KafkaMessageDTO();
 		assertNotNull(StringUtility.toJSONJackson(msg));
-	}
+	} 
+	
+	@Test
+	@DisplayName("Json Utility - Test OK")
+	void jsonUtilityTestOk() {
+		KafkaMessageDTO dto = new KafkaMessageDTO(); 
+		dto.setMessage(TEST_MESSAGE); 
+		
+		String jsonAsString = JsonUtility.objectToJson(dto); 
+		
+		assertEquals(String.class, jsonAsString.getClass()); 		
+
+	} 
+	
+	
+	@Test
+	@DisplayName("Json Utility - Test KO")
+	void jsonUtilityTestKo() {
+		DocumentResponseDTO dto = new DocumentResponseDTO(); 
+		dto.setSpanID(TEST_SPAN_ID); 
+		dto.setTraceID(TEST_TRACE_ID); 
+		
+		LogTraceInfoDTO logTraceInfoDto = new LogTraceInfoDTO(TEST_SPAN_ID, TEST_TRACE_ID); 
+		ResponseDTO responseDto = new ResponseDTO(logTraceInfoDto); 
+		
+		String jsonAsString = JsonUtility.objectToJson(dto); 
+		KafkaMessageDTO convertedDto = JsonUtility.jsonToObject(jsonAsString, KafkaMessageDTO.class); 
+		
+		String jsonAsStringResponseDto = JsonUtility.objectToJson(responseDto); 
+		KafkaMessageDTO convertedResponseDto = JsonUtility.jsonToObject(jsonAsStringResponseDto, KafkaMessageDTO.class); 
+		
+		assertNull(convertedDto); 
+		assertNull(convertedResponseDto); 
+		
+	} 
+	
+
 	
 	@Data
 	@NoArgsConstructor
@@ -161,6 +210,15 @@ class UtilityTest {
 		assertThrows(BusinessException.class, ()->edsClient.sendData(workflowInstanceId));
 	}
 	
+	@Test
+	@DisplayName("Generate UUID Test")
+	void generateUuidTest() {
+		String uuid = StringUtility.generateUUID(); 
+		
+		assertEquals(String.class, uuid.getClass()); 
+	}
 	
-	
-}
+
+} 
+
+

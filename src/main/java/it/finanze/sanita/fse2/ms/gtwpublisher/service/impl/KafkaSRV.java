@@ -138,7 +138,12 @@ public class KafkaSRV implements IKafkaSRV {
 			result = txKafkaTemplate.executeInTransaction(t -> { 
 				try {
 					return t.send(producerRecord).get();
-				} catch (Exception e) {
+				} catch(InterruptedException e) {
+					log.error("InterruptedException caught. Interrupting thread...");					
+					Thread.currentThread().interrupt(); 
+					throw new BusinessException(e); 
+				}
+				catch (Exception e) {
 					throw new BusinessException(e);
 				}  
 			});  

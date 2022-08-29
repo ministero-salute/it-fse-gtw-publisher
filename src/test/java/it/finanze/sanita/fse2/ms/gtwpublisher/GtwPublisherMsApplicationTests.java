@@ -23,6 +23,7 @@ class GtwPublisherMsApplicationTests {
 
 	@Test
 	void contextLoads() {
+	    elasticLogger.trace("messaggio per elk", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
 	    elasticLogger.info("messaggio per elk", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
 	    elasticLogger.debug("messaggio ko", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, new Date());
 	    elasticLogger.warn("messaggio ok", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
