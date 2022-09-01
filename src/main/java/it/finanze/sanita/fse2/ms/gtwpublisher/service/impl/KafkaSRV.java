@@ -130,6 +130,7 @@ public class KafkaSRV implements IKafkaSRV {
 		this.abstractListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.HIGH);
 	}
 
+	@SuppressWarnings("unchecked")
 	private RecordMetadata kafkaSend(ProducerRecord<String, String> producerRecord, boolean trans) {
 		RecordMetadata out = null;
 		Object result = null;

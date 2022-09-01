@@ -33,7 +33,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan(basePackages = {Constants.ComponentScan.BASE})
 @ActiveProfiles(Constants.Profile.TEST)

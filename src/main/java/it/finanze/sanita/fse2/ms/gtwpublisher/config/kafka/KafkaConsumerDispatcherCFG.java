@@ -131,6 +131,7 @@ public class KafkaConsumerDispatcherCFG {
 	/**
 	 * @return	exceptions list
 	 */
+	@SuppressWarnings("unchecked")
 	private List<Class<? extends Exception>> getExceptionsConfig() {
 		List<Class<? extends Exception>> out = new ArrayList<>();
 		String temp = null;
