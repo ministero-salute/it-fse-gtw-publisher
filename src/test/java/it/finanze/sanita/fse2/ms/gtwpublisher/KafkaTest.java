@@ -13,7 +13,6 @@ import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.record.TimestampType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +35,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -79,7 +79,7 @@ class KafkaTest {
 		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
 
 	    records.put(new TopicPartition(topic, 0), new ArrayList<ConsumerRecord<String, String>>());
-		ConsumerRecord<String, String> record = new ConsumerRecord<String, String>(topic, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topic, value);
+		ConsumerRecord<String, String> record = new ConsumerRecord<String,String>(topic, 1, 0, StringUtility.generateUUID(), value);
 	
 	    map.put("test", value);
 
@@ -104,8 +104,8 @@ class KafkaTest {
 		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
 
 		records.put(new TopicPartition(topic, 0), new ArrayList<>());
-		ConsumerRecord<String, String> record = new ConsumerRecord<String, String>(topic, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topic, value);
-
+		ConsumerRecord<String, String> record = new ConsumerRecord<String,String>(topic, 1, 0, StringUtility.generateUUID(), value);
+	
 		map.put("test", value);
 
 		BDDMockito.when(edsClient.sendData(Mockito.anyString())).thenThrow(BusinessException.class);
@@ -134,9 +134,9 @@ class KafkaTest {
 		
 		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, null));
 
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<>(topicLow, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topicLow, value);
-		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<>(topicMedium, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topicMedium, value);
-		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<>(topicHigh, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topicHigh, value);
+		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<String,String>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<String,String>(topicHigh, 1, 0, StringUtility.generateUUID(), value);
 
         BDDMockito.given(edsClient.sendData(Mockito.anyString())).willReturn(new EdsPublicationResponseDTO(true, ""));
 
@@ -163,9 +163,9 @@ class KafkaTest {
 		
 		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, null));
 
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<>(topicLow, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topicLow, value);
-		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<>(topicMedium, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topicMedium, value);
-		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<>(topicHigh, 1, 0, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, topicHigh, value);
+		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<String,String>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<String,String>(topicHigh, 1, 0, StringUtility.generateUUID(), value);
 
 		BDDMockito.given(edsClient.sendData(Mockito.anyString())).willReturn(new EdsPublicationResponseDTO(true, ""));
 

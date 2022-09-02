@@ -90,36 +90,6 @@ public class KafkaConsumerPropertiesCFG implements Serializable {
 	private List<String> deadLetterExceptions;
 
 	/**
-	 * Protocollo.
-	 */
-	@Value("${kafka.properties.security.protocol}")
-	private String protocol;
-
-	/**
-	 * Meccanismo.
-	 */
-	@Value("${kafka.properties.sasl.mechanism}")
-	private String mechanism;
-
-	/**
-	 * Config jaas.
-	 */
-	@Value("${kafka.properties.sasl.jaas.config}")
-	private String configJaas;
-
-	/**
-	 * Truststore location.
-	 */
-	@Value("${kafka.properties.ssl.truststore.location}")
-	private String trustoreLocation;
-
-	/**
-	 * Truststore password.
-	 */
-	@Value("${kafka.properties.ssl.truststore.password}")
-	private transient char[] trustorePassword;
-
-	/**
 	 * Flag enable ssl.
 	 */
 	@Value("${kafka.enablessl}")
