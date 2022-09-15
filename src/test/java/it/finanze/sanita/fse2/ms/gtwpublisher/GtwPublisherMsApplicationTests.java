@@ -12,22 +12,22 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ILogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.OperationLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.logging.ElasticLoggerHelper;
+import it.finanze.sanita.fse2.ms.gtwpublisher.logging.KafkaLoggerHelper;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan(basePackages = {Constants.ComponentScan.BASE})
 @ActiveProfiles(Constants.Profile.TEST)
 class GtwPublisherMsApplicationTests {
 
 	@Autowired
-	private ElasticLoggerHelper elasticLogger;
+	private KafkaLoggerHelper kafkaLogger;
 
 	@Test
 	void contextLoads() {
-	    elasticLogger.trace("messaggio per elk", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
-	    elasticLogger.info("messaggio per elk", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
-	    elasticLogger.debug("messaggio ko", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, new Date());
-	    elasticLogger.warn("messaggio ok", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
-	    elasticLogger.error("messaggio errore", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date(), new ILogEnum() {
+	    kafkaLogger.trace("messaggio per elk", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
+	    kafkaLogger.info("messaggio per elk", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
+	    kafkaLogger.debug("messaggio ko", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, new Date());
+	    kafkaLogger.warn("messaggio ok", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date());
+	    kafkaLogger.error("messaggio errore", OperationLogEnum.SEND_EDS, ResultLogEnum.OK, new Date(), new ILogEnum() {
 			
 			@Override
 			public String getDescription() {

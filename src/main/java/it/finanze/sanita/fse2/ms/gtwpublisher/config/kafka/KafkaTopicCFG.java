@@ -77,6 +77,12 @@ public class KafkaTopicCFG {
 	@Value("${kafka.statusmanager.topic}")
 	private String statusManagerTopic;
 
+	/**
+	 * Log topic.
+	 */
+	@Value("${kafka.log.base-topic}")
+	private String logTopic;
+
 	@PostConstruct
 	public void afterInit() {
 		if (profileUtility.isTestProfile()) {
