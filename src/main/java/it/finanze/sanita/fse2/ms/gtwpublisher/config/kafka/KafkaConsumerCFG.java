@@ -23,19 +23,11 @@ public class KafkaConsumerCFG {
     private KafkaPropertiesCFG kafkaProps;
 
     protected void addCommonsProperties(Map<String, Object> props) {
-        log.info("KEY_DESERIALIZER_CLASS_CONFIG: " + kafkaConsumerPropCFG.getConsumerKeyDeserializer());
+        
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, kafkaConsumerPropCFG.getConsumerKeyDeserializer());
-
-        log.info("VALUE_DESERIALIZER_CLASS_CONFIG: " + kafkaConsumerPropCFG.getConsumerValueDeserializer());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, kafkaConsumerPropCFG.getConsumerValueDeserializer());
-
-        log.info("ISOLATION_LEVEL_CONFIG: " + kafkaConsumerPropCFG.getIsolationLevel());
         props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, kafkaConsumerPropCFG.getIsolationLevel());
-
-        log.info("ENABLE_AUTO_COMMIT_CONFIG: " + kafkaConsumerPropCFG.getAutoCommit());
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, kafkaConsumerPropCFG.getAutoCommit());
-
-        log.info("AUTO_OFFSET_RESET_CONFIG: " + kafkaConsumerPropCFG.getAutoOffsetReset());
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaConsumerPropCFG.getAutoOffsetReset());
 
         // SSL
@@ -52,7 +44,7 @@ public class KafkaConsumerCFG {
 		List<Class<? extends Exception>> out = getExceptionsConfig();
 
 		for (Class<? extends Exception> ex : out) {
-			log.info("addNotRetryableException: " + ex);
+			log.warn("Found a non retryable Exception: {}", ex.getCanonicalName());
 			sceh.addNotRetryableExceptions(ex);
 		}
 		

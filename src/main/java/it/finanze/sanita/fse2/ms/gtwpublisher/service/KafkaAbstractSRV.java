@@ -68,7 +68,7 @@ public abstract class KafkaAbstractSRV {
 		if (result != null) {
 			SendResult<String, String> sendResult = (SendResult<String, String>) result;
 			out = sendResult.getRecordMetadata();
-			log.info("Send success.");
+			log.debug("Message sent successfully");
 		}
 
 		return out;

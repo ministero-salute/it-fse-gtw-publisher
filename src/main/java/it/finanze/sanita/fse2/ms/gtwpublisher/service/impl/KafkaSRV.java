@@ -99,10 +99,10 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	}
 
 	private void abstractListener(final ConsumerRecord<String, String> cr, EventSourceEnum eventSource, PriorityTypeEnum priorityType) {
-		log.info("Listening from: {} with {} priority", eventSource.getName(), priorityType.getCode());
+		log.debug("Listening from: {} with {} priority", eventSource.getName(), priorityType.getCode());
 		Date startDateOperation = new Date();
 
-		log.info("Consuming Transaction Event - Message received from topic {} with key {}", cr.topic(), cr.key());
+		log.debug("Consuming Transaction Event - Message received from topic {} with key {}", cr.topic(), cr.key());
 		IndexerValueDTO valueInfo = new Gson().fromJson(cr.value(), IndexerValueDTO.class);
 
 		EventTypeEnum eventType = EventTypeEnum.SEND_TO_EDS;

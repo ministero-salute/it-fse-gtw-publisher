@@ -48,7 +48,7 @@ public class EdsClient implements IEdsClient {
 		}
 
 		EdsPublicationResponseDTO out = new EdsPublicationResponseDTO();
-		log.info("Calling eds client - START");
+		log.info("EDS Client - Callind EDS to send data for publishing");
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 
@@ -58,7 +58,7 @@ public class EdsClient implements IEdsClient {
 		try {
 			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + msUrlCFG.getEdsClientPath() + msUrlCFG.getEdsClientPublish(), HttpMethod.POST, entity, EdsPublicationResponseDTO.class);
 			out = response.getBody();
-			log.info("{} status returned from Fhir mapping Client", response.getStatusCode());
+			log.debug("{} status returned from Fhir mapping Client", response.getStatusCode());
 		} catch (ResourceAccessException | ConnectionRefusedException cex) {
 			log.error("Connect error while call eds client ep: ", cex);
 			throw cex;
@@ -76,7 +76,7 @@ public class EdsClient implements IEdsClient {
 		}
 
 		EdsPublicationResponseDTO out = new EdsPublicationResponseDTO();
-		log.info("Calling eds client to execute update of document with id: {}", valueInfo.getIdentificativoDocUpdate());
+		log.info("EDS Client - Calling eds client to execute update of document with id: {}", valueInfo.getIdentificativoDocUpdate());
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 
@@ -86,7 +86,7 @@ public class EdsClient implements IEdsClient {
 		try {
 			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + "/v1/eds-replace", HttpMethod.PUT, entity, EdsPublicationResponseDTO.class);
 			out = response.getBody();
-			log.info("{} status returned from Fhir mapping Client", response.getStatusCode());
+			log.debug("{} status returned from Fhir mapping Client", response.getStatusCode());
 		} catch (ResourceAccessException | ConnectionRefusedException cex) {
 			log.error("Connection error while calling eds client endpoint to execute replace of document: ", cex);
 			throw cex;

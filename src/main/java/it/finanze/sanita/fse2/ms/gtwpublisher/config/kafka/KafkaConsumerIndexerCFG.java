@@ -43,13 +43,8 @@ public class KafkaConsumerIndexerCFG extends KafkaConsumerCFG {
 	public Map<String, Object> consumerConfigsIndexer() {
 		Map<String, Object> props = new HashMap<>();
 
-		log.info("CLIENT_ID_CONFIG: " + kafkaConsumerPropCFG.getClientIdIndexer());
 		props.put(ConsumerConfig.CLIENT_ID_CONFIG, kafkaConsumerPropCFG.getClientIdIndexer());
-		
-		log.info("BOOTSTRAP_SERVERS_CONFIG: " + kafkaConsumerPropCFG.getConsumerBootstrapServers());
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConsumerPropCFG.getConsumerBootstrapServers());
-		
-		log.info("GROUP_ID_CONFIG: " + kafkaConsumerPropCFG.getConsumerGroupIdIndexer());
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConsumerPropCFG.getConsumerGroupIdIndexer());
 		
 		addCommonsProperties(props);
@@ -80,13 +75,13 @@ public class KafkaConsumerIndexerCFG extends KafkaConsumerCFG {
 		factory.setConsumerFactory(consumerFactoryIndexer());
 		
 		// Definizione nome topic deadLetter
-		log.info("TOPIC: " + kafkaTopicCFG.getIndexerPublisherDeadLetterTopic());
+		log.info("TOPIC definition: " + kafkaTopicCFG.getIndexerPublisherDeadLetterTopic());
 		DeadLetterPublishingRecoverer dlpr = new DeadLetterPublishingRecoverer(deadLetterKafkaTemplate, (record, ex) -> new TopicPartition(kafkaTopicCFG.getIndexerPublisherDeadLetterTopic(), -1));
 		
 		// Set classificazione errori da gestire per la deadLetter.
 		DefaultErrorHandler sceh = new DefaultErrorHandler(dlpr, new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS));
 		
-		log.info("setClassification - kafkaIndexerListenerDeadLetterContainerFactory: ");
+		log.info("Kafka dead letter classification");
 		setClassification(sceh);
 		
 		// da eliminare se non si volesse gestire la dead letter
