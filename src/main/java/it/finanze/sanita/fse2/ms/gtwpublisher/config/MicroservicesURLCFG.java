@@ -18,10 +18,4 @@ public class MicroservicesURLCFG {
 	@Value("${ms.url.gtw-eds-client-service}")
 	private String edsClientHost;
 
-	@Value("${ms.url.gtw-eds-client-path}")
-	private String edsClientPath;
-
-	@Value("${ms.url.gtw-eds-client.publish.ep}")
-	private String edsClientPublish;
-
 }

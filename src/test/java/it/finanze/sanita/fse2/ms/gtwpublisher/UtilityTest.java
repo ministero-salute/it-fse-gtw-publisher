@@ -1,14 +1,18 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Arrays;
-
+import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.DocumentResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.LogTraceInfoDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.ResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.JsonUtility;
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,20 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 
-import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
-import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.DocumentResponseDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.LogTraceInfoDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.ResponseDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.CurrentApplicationLogEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ErrorLogEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.gtwpublisher.utility.JsonUtility;
-import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -46,40 +37,7 @@ class UtilityTest {
 	
 	
 	@Autowired
-	private IEdsClient edsClient; 
-	
-	@Test
-	@DisplayName("enumeration test ")
-	void CurrentApplicationLogEnum() {			
-			for(CurrentApplicationLogEnum entry : Arrays.asList(CurrentApplicationLogEnum.values())) {
-				assertNotNull(entry.getCode());
-				assertNotNull(entry.getDescription());
-				}
-			
-			for(ErrorLogEnum entry : Arrays.asList(ErrorLogEnum.values())) {
-				assertNotNull(entry.getCode());
-				assertNotNull(entry.getDescription());
-				}
-			
-			for(EventTypeEnum entry : Arrays.asList(EventTypeEnum.values())) {
-				assertNotNull(entry.getName());
-				}
-			
-			for(EventStatusEnum entry : Arrays.asList(EventStatusEnum.values())) {
-				assertNotNull(entry.getName());
-				}
-			
-			for(CurrentApplicationLogEnum entry : Arrays.asList(CurrentApplicationLogEnum.values())) {
-				assertNotNull(entry.getCode());
-				assertNotNull(entry.getDescription());
-				}
-			
-			for(CurrentApplicationLogEnum entry : Arrays.asList(CurrentApplicationLogEnum.values())) {
-				assertNotNull(entry.getCode());
-				assertNotNull(entry.getDescription());
-				}
-	}
-	
+	private IEdsClient edsClient;
 	
 	@Test
 	@DisplayName("String utility null -> exception")
@@ -206,7 +164,8 @@ class UtilityTest {
 	@DisplayName("findAndSendToEdsByWorkflowInstanceId test Ko")
 	void findAndSendToEdsByWorkflowInstanceIdKo() {
 		String workflowInstanceId = null;
-		assertThrows(BusinessException.class, ()->edsClient.sendData(workflowInstanceId));
+		PriorityTypeEnum priorityTypeEnum = PriorityTypeEnum.HIGH;
+		assertThrows(BusinessException.class, ()->edsClient.sendPublicationData(new IndexerValueDTO(workflowInstanceId, "identificativoDocUpdate", ProcessorOperationEnum.PUBLISH), priorityTypeEnum));
 	}
 	
 	@Test

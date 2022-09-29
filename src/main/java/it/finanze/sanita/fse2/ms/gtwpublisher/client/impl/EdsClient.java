@@ -1,5 +1,7 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.client.impl;
-
+ 
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.PublicationRequestBodyDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -41,9 +43,9 @@ public class EdsClient implements IEdsClient {
 	private transient MicroservicesURLCFG msUrlCFG;
 
 	@Override
-	public EdsPublicationResponseDTO sendData(final String workflowInstanceId) {
+	public EdsPublicationResponseDTO sendPublicationData(final IndexerValueDTO valueInfo, final PriorityTypeEnum priorityType) {
 
-		if(workflowInstanceId == null || workflowInstanceId.isEmpty()) {
+		if(valueInfo.getWorkflowInstanceId() == null || valueInfo.getWorkflowInstanceId().isEmpty()) {
 			throw new BusinessException("workflowInstanceId is null or empty");
 		}
 
@@ -52,11 +54,16 @@ public class EdsClient implements IEdsClient {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 
-		HttpEntity<?> entity = new HttpEntity<>(workflowInstanceId, headers);
+		PublicationRequestBodyDTO requestBody = new PublicationRequestBodyDTO();
+		requestBody.setIdentificativoDoc(valueInfo.getIdentificativoDocUpdate());
+		requestBody.setWorkflowInstanceId(valueInfo.getWorkflowInstanceId());
+		requestBody.setPriorityType(priorityType);
+
+		HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
 
 		ResponseEntity<EdsPublicationResponseDTO> response = null;
 		try {
-			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + msUrlCFG.getEdsClientPath() + msUrlCFG.getEdsClientPublish(), HttpMethod.POST, entity, EdsPublicationResponseDTO.class);
+			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + "/v1/eds-publish", HttpMethod.POST, entity, EdsPublicationResponseDTO.class);
 			out = response.getBody();
 			log.debug("{} status returned from Fhir mapping Client", response.getStatusCode());
 		} catch (ResourceAccessException | ConnectionRefusedException cex) {
@@ -70,7 +77,7 @@ public class EdsClient implements IEdsClient {
 	}
 
 	@Override
-	public EdsPublicationResponseDTO sendUpdateData(IndexerValueDTO valueInfo) {
+	public EdsPublicationResponseDTO sendReplaceData(IndexerValueDTO valueInfo) {
 		if(StringUtility.isNullOrEmpty(valueInfo.getIdentificativoDocUpdate()) || StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
 			throw new BusinessException("workflowInstanceId or identifier of document to update is null or empty");
 		}

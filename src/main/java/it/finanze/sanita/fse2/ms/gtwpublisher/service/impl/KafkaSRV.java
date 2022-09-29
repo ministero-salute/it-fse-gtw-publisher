@@ -2,6 +2,8 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.service.impl;
 
 import java.util.Date;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaConsumerPropertiesCFG;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +14,10 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
-import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaConsumerPropertiesCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaStatusManagerDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ErrorLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventSourceEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
@@ -25,7 +25,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.enums.OperationLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.gtwpublisher.logging.KafkaLoggerHelper;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.KafkaAbstractSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.ProfileUtility;
@@ -35,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
  * @author vincenzoingenito
+ * @author Riccardo Bonesi
  *
  * Kafka management service.
  */
@@ -52,9 +52,6 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	
 	@Autowired
 	private transient KafkaTopicCFG kafkaTopicCFG;
-
-	@Autowired
-	private transient KafkaLoggerHelper kafkaLogger;
 
 	@Autowired
 	private transient ProfileUtility profileUtility;
@@ -110,15 +107,15 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		try {
 			if(!StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
 
-				EdsPublicationResponseDTO response = new EdsPublicationResponseDTO();
-				if (StringUtility.isNullOrEmpty(valueInfo.getIdentificativoDocUpdate())) {
-					response = edsClient.sendData(valueInfo.getWorkflowInstanceId());
+				EdsPublicationResponseDTO response;
+				if (valueInfo.getEdsDPOperation().equals(ProcessorOperationEnum.PUBLISH)) {
+					response = edsClient.sendPublicationData(valueInfo, priorityType);
 				} else {
-					response = edsClient.sendUpdateData(valueInfo);
+					response = edsClient.sendReplaceData(valueInfo);
 				}
 
 				if ((response != null && Boolean.TRUE.equals(response.getEsito())) || profileUtility.isTestProfile() || profileUtility.isDevProfile()) {
-					kafkaLogger.info("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
+					log.info("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
 					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
 				}
 			} else {
@@ -135,11 +132,11 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 						break;
 				}
 				log.warn("Error consuming {} Event with key {}: null received", consumedEvent, cr.key());
-				kafkaLogger.error("Error consuming Kafka Event with key " + cr.key() + ": null received", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation, ErrorLogEnum.KO_EDS);
+				log.error("Error consuming Kafka Event with key " + cr.key() + ": null received", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
 				sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.BLOCKING_ERROR, null);
 			}
 		} catch (Exception e) {
-			kafkaLogger.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation, ErrorLogEnum.KO_EDS);
+			log.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
 			deadLetterHelper(e);
 			if (!kafkaConsumerPropertiesCFG.getDeadLetterExceptions().contains(e.getClass().getName())) {
 				sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.NON_BLOCKING_ERROR, ExceptionUtils.getStackTrace(e));

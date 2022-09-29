@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 
 
 /**
@@ -13,7 +14,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationRespons
  */
 public interface IEdsClient extends Serializable {
 
-    EdsPublicationResponseDTO sendData(String workflowInstanceId);
+    EdsPublicationResponseDTO sendPublicationData(IndexerValueDTO valueInfo, PriorityTypeEnum priorityType);
 
-    EdsPublicationResponseDTO sendUpdateData(IndexerValueDTO valueInfo);
+    EdsPublicationResponseDTO sendReplaceData(IndexerValueDTO valueInfo);
 }

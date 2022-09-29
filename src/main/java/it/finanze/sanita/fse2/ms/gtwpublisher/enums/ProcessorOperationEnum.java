@@ -1,16 +1,18 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ProcessorOperationEnum {
 
-	CREATE("Create"),
-	UPDATE("Update"),
-	DELETE("Delete"); 
+	PUBLISH("PUBLISH"),
+	DELETE("DELETE"),
+	REPLACE("REPLACE"),
+	UPDATE("UPDATE"),
+	READ("READ");
 
-	private final String name;
+	private String name;
 
-	public String getName() {
-		return name;
-	}
 	ProcessorOperationEnum(String pname) {
 		name = pname;
 	}

@@ -7,3 +7,14 @@ log.logstash.url=127.0.0.1:5000
 
 add:
 kafka.log.base-topic=MDS-SA-0004_FU_001_LOG
+
+
+28/09/2022
+Added:
+log.level=trace
+log.kafka-log.enable=true
+kafka.log.base-topic=MDS-SA-0004_FU_001_LOG
+
+Removed:
+ms.url.gtw-eds-client-path=/v1
+ms.url.gtw-eds-client.publish.ep=/eds-publish
