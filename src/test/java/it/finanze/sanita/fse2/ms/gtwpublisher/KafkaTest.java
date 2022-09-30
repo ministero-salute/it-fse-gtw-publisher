@@ -141,7 +141,7 @@ class KafkaTest {
 		records.put(new TopicPartition(topicMedium, 0), new ArrayList<>());
 		records.put(new TopicPartition(topicHigh, 0), new ArrayList<>());
 
-		final String value = "{\"workflowInstanceId\":\"wii1\",\"identificativoDocUpdate\":\"id1\",\"edsDPOperation\":\"PUBLISH\"}";
+		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"PUBLISH\"}";
 
 		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
 		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<String,String>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
@@ -175,7 +175,7 @@ class KafkaTest {
 		records.put(new TopicPartition(topicMedium, 0), new ArrayList<>());
 		records.put(new TopicPartition(topicHigh, 0), new ArrayList<>());
 
-		final String value = "{\"workflowInstanceId\":\"wii1\",\"identificativoDocUpdate\":\"id1\",\"edsDPOperation\":\"PUBLISH\"}";
+		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"PUBLISH\"}";
 
 		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
 		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<String,String>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
@@ -214,7 +214,7 @@ class KafkaTest {
         // paste a workflowInstanceId present in your ini_eds_invocation mongo collection
 
         String workFlowInstanceId = "2.16.840.1.113883.2.9.2.120.4.4.030702.TSTSMN63A01F205H.20220325112426.OQlvTq1J.dead66852ddb42dbbdf3556bcd87be02^^^^urn:ihe:iti:xdw:2013:workflowInstanceId";
-        edsClient.sendPublicationData(new IndexerValueDTO(workFlowInstanceId, "identificativoDocUpdate", ProcessorOperationEnum.PUBLISH), PriorityTypeEnum.HIGH);
+        edsClient.sendPublicationData(new IndexerValueDTO(workFlowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH), PriorityTypeEnum.HIGH);
 
     }
 }

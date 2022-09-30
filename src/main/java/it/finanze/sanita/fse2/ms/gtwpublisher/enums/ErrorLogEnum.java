@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorLogEnum implements ILogEnum {
 
-	KO_EDS("KO-VAL", "Errore nella chiamata a EDS");
+	KO_EDS("KO_EDS", "Errore nella chiamata a EDS");
 
 	private String code;
 
