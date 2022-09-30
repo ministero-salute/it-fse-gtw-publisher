@@ -60,7 +60,7 @@ class KafkaTest {
 	private RestTemplate restTemplate;
 
 	@Test
-	@Description("Success test on indexer listener")
+	@Description("Publish - Success test on indexer listener")
 	void kafkaListenerIndexerSuccessTest() {
 		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
 		String topicMedium = kafkaTopicCFG.getIndexerPublisherMediumPriorityTopic();
@@ -217,4 +217,90 @@ class KafkaTest {
         edsClient.sendPublicationData(new IndexerValueDTO(workFlowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH), PriorityTypeEnum.HIGH);
 
     }
+
+	@Test
+	@Description("Replace - Success test on indexer listener")
+	void kafkaReplaceListenerIndexerSuccessTest() {
+		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
+
+		Map<String, Object> map = new HashMap<>();
+		MessageHeaders headers = new MessageHeaders(map);
+
+		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
+
+		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
+
+		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, "String", ProcessorOperationEnum.REPLACE));
+
+		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
+
+		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
+		mockResponse.setEsito(true);
+
+		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
+				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
+
+		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
+	}
+
+	@Test
+	@Description("Replace - error test on indexer listener - do nothing")
+	void kafkaReplaceListenerIndexerErrorTest() {
+		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
+
+		Map<String, Object> map = new HashMap<>();
+		MessageHeaders headers = new MessageHeaders(map);
+
+		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
+
+		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
+
+		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"REPLACE\"}";
+
+		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
+
+		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
+		mockResponse.setEsito(false);
+		mockResponse.setErrorMessage("Errore generico");
+
+		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
+				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
+
+		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
+	}
+
+	@Test
+	@Description("Replace - exceptions test on indexer listener")
+	void kafkaReplaceListenerIndexerAllExceptionTest() {
+		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
+
+		Map<String, Object> map = new HashMap<>();
+		MessageHeaders headers = new MessageHeaders(map);
+
+		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
+
+		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
+
+		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"REPLACE\"}";
+
+		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
+
+		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
+		mockResponse.setEsito(true);
+
+		Mockito.doThrow(new ResourceAccessException("")).when(restTemplate)
+				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
+
+		assertThrows(ResourceAccessException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
+
+		Mockito.doThrow(new ConnectionRefusedException("", "")).when(restTemplate)
+				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
+
+		assertThrows(ConnectionRefusedException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
+
+		Mockito.doThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY)).when(restTemplate)
+				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
+
+		assertThrows(BusinessException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
+	}
 }
