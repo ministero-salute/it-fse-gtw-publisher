@@ -136,15 +136,7 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-
-		<!-- CRYPT -->
-		<!-- https://mvnrepository.com/artifact/org.jasypt/jasypt -->
-		<dependency>
-			<groupId>org.jasypt</groupId>
-			<artifactId>jasypt</artifactId>
-			<version>1.9.3</version>
-		</dependency>
-
+ 
 		<!-- TRACING -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
