@@ -165,7 +165,7 @@ class UtilityTest {
 	void findAndSendToEdsByWorkflowInstanceIdKo() {
 		String workflowInstanceId = null;
 		PriorityTypeEnum priorityTypeEnum = PriorityTypeEnum.HIGH;
-		assertThrows(BusinessException.class, ()->edsClient.sendPublicationData(new IndexerValueDTO(workflowInstanceId, "identificativoDocUpdate", ProcessorOperationEnum.PUBLISH), priorityTypeEnum));
+		assertThrows(BusinessException.class, ()->edsClient.sendPublicationData(new IndexerValueDTO(workflowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH), priorityTypeEnum));
 	}
 	
 	@Test
