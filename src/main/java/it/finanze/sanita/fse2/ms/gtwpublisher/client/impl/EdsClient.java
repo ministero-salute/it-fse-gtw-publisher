@@ -50,7 +50,7 @@ public class EdsClient implements IEdsClient {
 		}
 
 		EdsPublicationResponseDTO out = new EdsPublicationResponseDTO();
-		log.info("EDS Client - Callind EDS to send data for publishing");
+		log.debug("EDS Client - Callind EDS to send data for publishing");
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 
@@ -83,7 +83,7 @@ public class EdsClient implements IEdsClient {
 		}
 
 		EdsPublicationResponseDTO out = new EdsPublicationResponseDTO();
-		log.info("EDS Client - Calling eds client to execute update of document with id: {}", valueInfo.getIdDoc());
+		log.debug("EDS Client - Calling eds client to execute update of document with id: {}", valueInfo.getIdDoc());
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 

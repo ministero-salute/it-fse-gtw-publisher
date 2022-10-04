@@ -75,13 +75,13 @@ public class KafkaConsumerIndexerCFG extends KafkaConsumerCFG {
 		factory.setConsumerFactory(consumerFactoryIndexer());
 		
 		// Definizione nome topic deadLetter
-		log.info("TOPIC definition: " + kafkaTopicCFG.getIndexerPublisherDeadLetterTopic());
+		log.debug("TOPIC definition: " + kafkaTopicCFG.getIndexerPublisherDeadLetterTopic());
 		DeadLetterPublishingRecoverer dlpr = new DeadLetterPublishingRecoverer(deadLetterKafkaTemplate, (record, ex) -> new TopicPartition(kafkaTopicCFG.getIndexerPublisherDeadLetterTopic(), -1));
 		
 		// Set classificazione errori da gestire per la deadLetter.
 		DefaultErrorHandler sceh = new DefaultErrorHandler(dlpr, new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS));
 		
-		log.info("Kafka dead letter classification");
+		log.debug("Kafka dead letter classification");
 		setClassification(sceh);
 		
 		// da eliminare se non si volesse gestire la dead letter
