@@ -119,19 +119,8 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
 				}
 			} else {
-				String consumedEvent = "";
-				switch (eventSource) {
-					case INDEXER:
-						consumedEvent = "Indexer";
-						break;
-					case DISPATCHER:
-						consumedEvent = "TSFeeding";
-						break;
-					default:
-						consumedEvent = "undefined";
-						break;
-				}
-				log.warn("Error consuming {} Event with key {}: null received", consumedEvent, cr.key());
+				
+				log.warn("Error consuming {} Event with key {}: null received", eventSource.getDescription(), cr.key());
 				log.error("Error consuming Kafka Event with key " + cr.key() + ": null received", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
 				sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.BLOCKING_ERROR, null);
 			}
