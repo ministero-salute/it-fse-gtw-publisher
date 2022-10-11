@@ -2,8 +2,6 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.service.impl;
 
 import java.util.Date;
 
-import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaConsumerPropertiesCFG;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.*;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaConsumerPropertiesCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaStatusManagerDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
@@ -23,6 +22,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.OperationLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
@@ -114,12 +114,13 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					response = edsClient.sendReplaceData(valueInfo);
 				}
 
-				if ((response != null && Boolean.TRUE.equals(response.getEsito())) || profileUtility.isTestProfile() || profileUtility.isDevProfile()) {
+				if ((response != null && Boolean.TRUE.equals(response.getEsito())) || profileUtility.isTestProfile() || profileUtility.isDevOrDockerProfile()) {
 					log.debug("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
 					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
+				} else {
+					throw new BusinessException(response != null ? response.getErrorMessage() : "Generic Exception");
 				}
 			} else {
-				
 				log.warn("Error consuming {} Event with key {}: null received", eventSource.getDescription(), cr.key());
 				log.error("Error consuming Kafka Event with key " + cr.key() + ": null received", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
 				sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.BLOCKING_ERROR, null);
