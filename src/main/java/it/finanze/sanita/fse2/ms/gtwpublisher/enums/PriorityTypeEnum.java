@@ -1,9 +1,9 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
 
 public enum PriorityTypeEnum {
-    LOW("low"),
-    MEDIUM("medium"),
-    HIGH("high");
+    LOW("LOW"),
+    MEDIUM("MEDIUM"),
+    HIGH("HIGH");
 
     private final String description;
 
