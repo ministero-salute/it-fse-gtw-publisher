@@ -5,7 +5,6 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.service.impl;
 
 import java.util.Date;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -65,41 +64,41 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) {
-		this.abstractListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.LOW);
+		genericListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.LOW);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) {
-		this.abstractListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.MEDIUM);
+		genericListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.MEDIUM);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) {
-		this.abstractListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.HIGH);
+		genericListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.HIGH);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.dispatcher-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.dispatcher.client-id-priority.low}'}", containerFactory = "kafkaDispatcherListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-dispatcher}'}")
 	public void lowPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) {
-		this.abstractListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.LOW);
+		genericListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.LOW);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.dispatcher-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.dispatcher.client-id-priority.medium}'}", containerFactory = "kafkaDispatcherListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-dispatcher}'}")
 	public void mediumPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) {
-		this.abstractListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.MEDIUM);
+		genericListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.MEDIUM);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.dispatcher-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.dispatcher.client-id-priority.high}'}", containerFactory = "kafkaDispatcherListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-dispatcher}'}")
 	public void highPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) {
-		this.abstractListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.HIGH);
+		genericListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.HIGH);
 	}
 
-	private void abstractListener(final ConsumerRecord<String, String> cr, EventSourceEnum eventSource, PriorityTypeEnum priorityType) {
-		log.debug("Listening from: {} with {} priority", eventSource.getName(), priorityType.getCode());
+	private void genericListener(final ConsumerRecord<String, String> cr, EventSourceEnum eventSource, PriorityTypeEnum priorityType) {
+		log.debug("Listening from: {} with {} priority", eventSource.getName(), priorityType.getDescription());
 		Date startDateOperation = new Date();
 
 		log.debug("Consuming Transaction Event - Message received from topic {} with key {}", cr.topic(), cr.key());
@@ -107,37 +106,53 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
 		EventTypeEnum eventType = EventTypeEnum.SEND_TO_EDS;
 
-		try {
-			if(!StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
+		boolean esito = false;
+		int counter = 0;
 
-				EdsPublicationResponseDTO response;
-				if (valueInfo.getEdsDPOperation().equals(ProcessorOperationEnum.PUBLISH)) {
-					response = edsClient.sendPublicationData(valueInfo, priorityType);
+		while(Boolean.FALSE.equals(esito) && counter<=kafkaConsumerPropertiesCFG.getNRetry()) {
+			try {
+				if(!StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
+					
+					EdsPublicationResponseDTO response = null;
+					if(Boolean.FALSE.equals(esito)) {
+						if (valueInfo.getEdsDPOperation().equals(ProcessorOperationEnum.PUBLISH)) {
+							response = edsClient.sendPublicationData(valueInfo, priorityType);
+						} else {
+							response = edsClient.sendReplaceData(valueInfo);
+						}
+						
+						if (Boolean.TRUE.equals(response.getEsito()) || profileUtility.isTestProfile() || profileUtility.isDevOrDockerProfile()) {
+							esito = response.getEsito();
+							log.debug("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
+							sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
+						} else {
+							//TODO - Cambiare in eds exception
+							throw new BusinessException(response.getErrorMessage());
+						}
+					}
 				} else {
-					response = edsClient.sendReplaceData(valueInfo);
+					log.error("Error consuming Kafka Event with key " + cr.key() + ": null received", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
+					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.BLOCKING_ERROR, null);
 				}
-
-				if ((response != null && Boolean.TRUE.equals(response.getEsito())) || profileUtility.isTestProfile() || profileUtility.isDevOrDockerProfile()) {
-					log.debug("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
-					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
+			} catch (Exception e) {
+				log.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
+				deadLetterHelper(e);
+				String errorMessage = StringUtility.isNullOrEmpty(e.getMessage()) ? "Errore generico durante l'invocazione del client di ini" : e.getMessage();
+				if(kafkaConsumerPropertiesCFG.getDeadLetterExceptions().contains(e.getClass().getName())) {
+					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR, errorMessage);
+				} else if (kafkaConsumerPropertiesCFG.getTemporaryExceptions().contains(e.getClass().getName())) {
+					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.NON_BLOCKING_ERROR, errorMessage);
 				} else {
-					throw new BusinessException(response != null ? response.getErrorMessage() : "Generic Exception");
+					counter++;
+					if(counter==kafkaConsumerPropertiesCFG.getNRetry()) {
+						sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR, "Massimo numero di retry raggiunto :" + errorMessage);
+					}
 				}
-			} else {
-				log.warn("Error consuming {} Event with key {}: null received", eventSource.getDescription(), cr.key());
-				log.error("Error consuming Kafka Event with key " + cr.key() + ": null received", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
-				sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.BLOCKING_ERROR, null);
+				throw e;
 			}
-		} catch (Exception e) {
-			log.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
-			deadLetterHelper(e);
-			if (!kafkaConsumerPropertiesCFG.getDeadLetterExceptions().contains(e.getClass().getName())) {
-				sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.NON_BLOCKING_ERROR, ExceptionUtils.getStackTrace(e));
-			} else {
-				sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR, ExceptionUtils.getStackTrace(e));
-			}
-			throw e;
 		}
+		
+		
 	}
 
 	/**

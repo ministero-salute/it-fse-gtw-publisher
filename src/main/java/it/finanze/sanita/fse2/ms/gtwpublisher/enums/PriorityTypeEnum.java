@@ -4,17 +4,25 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
 
 public enum PriorityTypeEnum {
-    LOW("LOW"),
-    MEDIUM("MEDIUM"),
-    HIGH("HIGH");
+	
+    LOW("LOW", "_LOW"),
+    MEDIUM("MEDIUM", "_MEDIUM"),
+    HIGH("HIGH", "_HIGH");
 
     private final String description;
+    
+    private final String queue;
 
-    PriorityTypeEnum(String description) {
-        this.description = description;
+    PriorityTypeEnum(String inDescription, String inQueue) {
+        description = inDescription;
+        queue = inQueue;
     }
 
-    public String getCode() {
-        return this.description;
+    public String getDescription() {
+        return description;
+    }
+    
+    public String getQueue() {
+        return queue;
     }
 }
