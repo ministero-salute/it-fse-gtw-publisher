@@ -23,49 +23,49 @@ public interface IKafkaSRV extends Serializable {
 	 * @param trans
 	 * @return
 	 */
-	RecordMetadata sendMessage(String topic, String key, String value, boolean trans);
+	RecordMetadata sendMessage(String topic, String key, String value, boolean trans) ;
  
 	/**
 	 * Kafka listener for Indexer communications in low priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+	void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
 
 	/**
 	 * Kafka listener for Indexer communications in medium priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+	void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
 
 	/**
 	 * Kafka listener for Indexer communications in high priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+	void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
 
 	/**
 	 * Kafka listener for Dispatcher communications for TSFeeding in low priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void lowPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+	void lowPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
 
 	/**
 	 * Kafka listener for Dispatcher communications for TSFeeding in medium priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void mediumPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+	void mediumPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
 
 	/**
 	 * Kafka listener for Dispatcher communications for TSFeeding in high priority
 	 * @param cr
 	 * @param messageHeaders
 	 */
-	void highPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders);
+	void highPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
 
 	/**
 	 * Send status message to respective topic

@@ -3,8 +3,6 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher.client.impl;
  
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.PublicationRequestBodyDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,7 +17,9 @@ import com.google.gson.Gson;
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.MicroservicesURLCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.PublicationRequestBodyDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.ConnectionRefusedException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
@@ -48,36 +48,34 @@ public class EdsClient implements IEdsClient {
 	@Override
 	public EdsPublicationResponseDTO sendPublicationData(final IndexerValueDTO valueInfo, final PriorityTypeEnum priorityType) {
 
-		if (valueInfo.getWorkflowInstanceId() == null || valueInfo.getWorkflowInstanceId().isEmpty()) {
-			throw new BusinessException("workflowInstanceId is null or empty");
-		}
-
 		EdsPublicationResponseDTO out = new EdsPublicationResponseDTO();
-		log.debug("EDS Client - Callind EDS to send data for publishing");
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Type", "application/json");
-
-		PublicationRequestBodyDTO requestBody = new PublicationRequestBodyDTO();
-		requestBody.setIdentificativoDoc(valueInfo.getIdDoc());
-		requestBody.setWorkflowInstanceId(valueInfo.getWorkflowInstanceId());
-		requestBody.setPriorityType(priorityType);
-
-		HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
-
-		ResponseEntity<EdsPublicationResponseDTO> response = null;
 		try {
+			log.debug("EDS Client - Callind EDS to send data for publishing");
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", "application/json");
+
+			PublicationRequestBodyDTO requestBody = new PublicationRequestBodyDTO();
+			requestBody.setIdentificativoDoc(valueInfo.getIdDoc());
+			requestBody.setWorkflowInstanceId(valueInfo.getWorkflowInstanceId());
+			requestBody.setPriorityType(priorityType);
+
+			HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
+
+			ResponseEntity<EdsPublicationResponseDTO> response = null;
+
 			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + "/v1/documents", HttpMethod.POST, entity, EdsPublicationResponseDTO.class);
 			out = response.getBody();
 			log.debug("{} status returned from Fhir mapping Client", response.getStatusCode());
-		} catch (ResourceAccessException | ConnectionRefusedException cex) {
-			log.error("Connect error while call eds client ep: ", cex);
-			throw cex;
+		} catch (ResourceAccessException rax) {
+			log.error("",rax);
+			throw rax;
 		} catch(Exception ex) {
-			log.error("Generic error while call document reference ep: ", ex);
-			throw new BusinessException("Generic error while call document reference ep: ", ex);
+			log.error("Generic error while call eds client ep: ", ex);
+			throw new BusinessException("Generic error while call eds client ep: ", ex);
 		}
 		return out;
 	}
+
 
 	@Override
 	public EdsPublicationResponseDTO sendReplaceData(IndexerValueDTO valueInfo) {

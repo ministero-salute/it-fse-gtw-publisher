@@ -149,7 +149,7 @@ class KafkaTest {
 
 		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
 		mockResponse.setEsito(false);
-		mockResponse.setErrorMessage("Errore generico");
+		mockResponse.setMessageError("Errore generico");
 
 		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
 				.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
@@ -261,7 +261,7 @@ class KafkaTest {
 
 		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
 		mockResponse.setEsito(false);
-		mockResponse.setErrorMessage("Errore generico");
+		mockResponse.setMessageError("Errore generico");
 
 		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
 				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));

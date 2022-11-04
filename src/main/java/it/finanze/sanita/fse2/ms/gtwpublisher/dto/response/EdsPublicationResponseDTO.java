@@ -15,5 +15,7 @@ public class EdsPublicationResponseDTO {
 
 	private Boolean esito;
 
-	private String errorMessage;
+	private String exClassCanonicalName;
+
+	private String messageError;
 }
