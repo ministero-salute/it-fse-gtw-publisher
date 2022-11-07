@@ -122,8 +122,9 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 						response = edsClient.sendReplaceData(valueInfo);
 					}
 
-					if (Boolean.TRUE.equals(response.getEsito()) || profileUtility.isTestProfile() || profileUtility.isDevOrDockerProfile()) {
-						esito = response.getEsito();
+					boolean testEnvironment = profileUtility.isTestProfile() || profileUtility.isDevOrDockerProfile();
+					if (Boolean.TRUE.equals(response.getEsito()) || testEnvironment) {
+						esito = testEnvironment ? true : response.getEsito();
 						log.debug("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
 						sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
 					} else {
