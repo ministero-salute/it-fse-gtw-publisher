@@ -52,9 +52,9 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
 	@Autowired
 	private IEdsClient edsClient;
-	
+
 	@Autowired
-	private transient KafkaTopicCFG kafkaTopicCFG;
+	private transient KafkaTopicCFG topicCFG;
 
 	@Autowired
 	private transient ProfileUtility profileUtility;
@@ -124,7 +124,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
 					boolean testEnvironment = profileUtility.isTestProfile() || profileUtility.isDevOrDockerProfile();
 					if (Boolean.TRUE.equals(response.getEsito()) || testEnvironment) {
-						esito = testEnvironment ? true : response.getEsito();
+						esito = testEnvironment || response.getEsito();
 						log.debug("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
 						sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
 					} else {
@@ -209,7 +209,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					exception(exception).
 					build();
 			String json = StringUtility.toJSONJackson(statusManagerMessage);
-			sendMessage(kafkaTopicCFG.getStatusManagerTopic(), workflowInstanceId, json, true);
+			sendMessage(topicCFG.getStatusManagerTopic(), workflowInstanceId, json, true);
 		} catch(Exception ex) {
 			log.error("Error while send status message on indexer : " , ex);
 			throw new BusinessException(ex);
