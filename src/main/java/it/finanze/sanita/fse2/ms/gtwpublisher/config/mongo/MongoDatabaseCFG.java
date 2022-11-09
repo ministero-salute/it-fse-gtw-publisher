@@ -27,7 +27,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 
 /**
  * 
- * @author vincenzoingenito
  *
  *	Configuration for MongoDB.
  */

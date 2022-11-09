@@ -36,8 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * @author vincenzoingenito
- * @author Riccardo Bonesi
  *
  * Kafka management service.
  */

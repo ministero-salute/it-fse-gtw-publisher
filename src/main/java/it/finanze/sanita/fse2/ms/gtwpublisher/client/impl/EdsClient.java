@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Production implemention of Eds Client.
  * 
- * @author Riccardo Bonesi
  */
 @Slf4j
 @Component 

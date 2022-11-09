@@ -4,7 +4,6 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.exceptions;
 
 /**
- * @author vincenzoingenito
  * 
  * Generic business exception.
  */
