@@ -162,53 +162,7 @@ class KafkaTest {
 		assertDoesNotThrow(()->kafkaSRV.highPriorityListenerIndexer(recordHigh, headers));
 	}
 
-	@Test
-	@Description("Publish - exceptions test on indexer listener")
-	void kafkaListenerIndexerAllExceptionTest() {
-		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
-		String topicMedium = kafkaTopicCFG.getIndexerPublisherMediumPriorityTopic();
-		String topicHigh = kafkaTopicCFG.getIndexerPublisherHighPriorityTopic();
-
-		Map<String, Object> map = new HashMap<>();
-		MessageHeaders headers = new MessageHeaders(map);
-
-		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
-
-		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
-		records.put(new TopicPartition(topicMedium, 0), new ArrayList<>());
-		records.put(new TopicPartition(topicHigh, 0), new ArrayList<>());
-
-		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"PUBLISH\"}";
-
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
-		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<String,String>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
-		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<String,String>(topicHigh, 1, 0, StringUtility.generateUUID(), value);
-
-		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
-		mockResponse.setEsito(true);
-
-		Mockito.doThrow(new ResourceAccessException("")).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertThrows(ResourceAccessException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-		assertThrows(ResourceAccessException.class, ()->kafkaSRV.mediumPriorityListenerIndexer(recordMedium, headers));
-		assertThrows(ResourceAccessException.class, ()->kafkaSRV.highPriorityListenerIndexer(recordHigh, headers));
-
-		Mockito.doThrow(new ConnectionRefusedException("", "")).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertThrows(ConnectionRefusedException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-		assertThrows(ConnectionRefusedException.class, ()->kafkaSRV.mediumPriorityListenerIndexer(recordMedium, headers));
-		assertThrows(ConnectionRefusedException.class, ()->kafkaSRV.highPriorityListenerIndexer(recordHigh, headers));
-
-		Mockito.doThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY)).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertThrows(BusinessException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-		assertThrows(BusinessException.class, ()->kafkaSRV.mediumPriorityListenerIndexer(recordMedium, headers));
-		assertThrows(BusinessException.class, ()->kafkaSRV.highPriorityListenerIndexer(recordHigh, headers));
-	}
-
+ 
     @Test
 	@Description("Send data to gtw-eds-client")
     @Disabled("Real test")
@@ -272,38 +226,4 @@ class KafkaTest {
 		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
 	}
 
-	@Test
-	@Description("Replace - exceptions test on indexer listener")
-	void kafkaReplaceListenerIndexerAllExceptionTest() {
-		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
-
-		Map<String, Object> map = new HashMap<>();
-		MessageHeaders headers = new MessageHeaders(map);
-
-		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
-
-		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
-
-		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"REPLACE\"}";
-
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
-
-		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
-		mockResponse.setEsito(true);
-
-		Mockito.doThrow(new ResourceAccessException("")).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertThrows(ResourceAccessException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-
-		Mockito.doThrow(new ConnectionRefusedException("", "")).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertThrows(ConnectionRefusedException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-
-		Mockito.doThrow(new HttpServerErrorException(HttpStatus.BAD_GATEWAY)).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertThrows(BusinessException.class, ()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-	}
 }

@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.ResourceAccessException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -168,7 +169,7 @@ class UtilityTest {
 	void findAndSendToEdsByWorkflowInstanceIdKo() {
 		String workflowInstanceId = null;
 		PriorityTypeEnum priorityTypeEnum = PriorityTypeEnum.HIGH;
-		assertThrows(BusinessException.class, ()->edsClient.sendPublicationData(new IndexerValueDTO(workflowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH), priorityTypeEnum));
+		assertThrows(ResourceAccessException.class, ()->edsClient.sendPublicationData(new IndexerValueDTO(workflowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH), priorityTypeEnum));
 	}
 	
 	@Test
