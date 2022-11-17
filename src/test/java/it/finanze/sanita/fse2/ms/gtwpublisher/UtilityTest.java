@@ -3,6 +3,25 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.ResourceAccessException;
+
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
@@ -16,16 +35,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.utility.JsonUtility;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.web.client.ResourceAccessException;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -155,8 +164,32 @@ class UtilityTest {
 		assertNull(convertedResponseDto); 
 		
 	} 
-	
 
+    @Test
+    @DisplayName("jsonToObject OK")
+    void testJsonToObjectOk() {
+        String input = "{\"identificativo\":\"stub\",\"flagPresaInCarico\":false}";
+        Map<String, Object> map = new HashMap<>();
+        map.put("identificativo", "stub");
+        map.put("flagPresaInCarico", false);
+        assertEquals(map, JsonUtility.jsonToObject(input, Map.class));
+    }
+
+    @Test
+    @DisplayName("objectToJson malformedInput")
+    void testObjectToJsonMalformedInput() {
+        Map<String, Object> input = new HashMap<>();
+        input.put(null, null);
+        assertEquals("", JsonUtility.objectToJson(input));
+    }
+
+    @Test
+    @DisplayName("objectToJson OK")
+    void testObjectToJsonOK() {
+        Map<String, Object> input = new HashMap<>();
+        input.put("key", "value");
+        assertEquals("{\"key\":\"value\"}", JsonUtility.objectToJson(input));
+    }
 	
 	@Data
 	@NoArgsConstructor
