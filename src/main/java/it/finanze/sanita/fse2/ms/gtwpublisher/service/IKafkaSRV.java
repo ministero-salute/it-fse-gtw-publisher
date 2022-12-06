@@ -45,27 +45,6 @@ public interface IKafkaSRV {
 	void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
 
 	/**
-	 * Kafka listener for Dispatcher communications for TSFeeding in low priority
-	 * @param cr
-	 * @param messageHeaders
-	 */
-	void lowPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
-
-	/**
-	 * Kafka listener for Dispatcher communications for TSFeeding in medium priority
-	 * @param cr
-	 * @param messageHeaders
-	 */
-	void mediumPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
-
-	/**
-	 * Kafka listener for Dispatcher communications for TSFeeding in high priority
-	 * @param cr
-	 * @param messageHeaders
-	 */
-	void highPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception;
-
-	/**
 	 * Send status message to respective topic
 	 * @param workflowInstanceId
 	 * @param eventType

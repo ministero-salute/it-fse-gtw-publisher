@@ -20,7 +20,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaStatusManagerDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventSourceEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.OperationLogEnum;
@@ -47,50 +46,29 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	private KafkaTopicCFG topicCFG;
 
 	@Autowired
-	private ProfileUtility profileUtility;
-
-	@Autowired
 	private KafkaConsumerPropertiesCFG kafkaConsumerPropertiesCFG;
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception {
-		genericListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.LOW);
+		genericListener(cr, PriorityTypeEnum.LOW);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception {
-		genericListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.MEDIUM);
+		genericListener(cr, PriorityTypeEnum.MEDIUM);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders)throws Exception  {
-		genericListener(cr, EventSourceEnum.INDEXER, PriorityTypeEnum.HIGH);
-	}
-
-	@Override
-	@KafkaListener(topics = "#{'${kafka.dispatcher-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.dispatcher.client-id-priority.low}'}", containerFactory = "kafkaDispatcherListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-dispatcher}'}")
-	public void lowPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception {
-		genericListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.LOW);
-	}
-
-	@Override
-	@KafkaListener(topics = "#{'${kafka.dispatcher-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.dispatcher.client-id-priority.medium}'}", containerFactory = "kafkaDispatcherListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-dispatcher}'}")
-	public void mediumPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception {
-		genericListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.MEDIUM);
-	}
-
-	@Override
-	@KafkaListener(topics = "#{'${kafka.dispatcher-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.dispatcher.client-id-priority.high}'}", containerFactory = "kafkaDispatcherListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-dispatcher}'}")
-	public void highPriorityListenerDispatcher(ConsumerRecord<String, String> cr, MessageHeaders messageHeaders) throws Exception {
-		genericListener(cr, EventSourceEnum.DISPATCHER, PriorityTypeEnum.HIGH);
+		genericListener(cr, PriorityTypeEnum.HIGH);
 	}
 	
 
-	private void genericListener(final ConsumerRecord<String, String> cr, EventSourceEnum eventSource, PriorityTypeEnum priorityType) throws Exception {
-		log.debug("Listening from: {} with {} priority", eventSource.getName(), priorityType.getDescription());
+	private void genericListener(final ConsumerRecord<String, String> cr, PriorityTypeEnum priorityType) throws Exception {
+		log.debug("Listening with {} priority", priorityType.getDescription());
 		Date startDateOperation = new Date();
 
 		log.debug("Consuming Transaction Event - Message received from topic {} with key {}", cr.topic(), cr.key());
@@ -130,13 +108,18 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 				}
 			} catch (Exception e) {
 				String canonicalName = ExceptionUtils.getRootCause(e).getClass().getCanonicalName();
+				String errorMessage = "";
 				if(response!=null && response.getExClassCanonicalName()!=null) {
 					canonicalName = response.getExClassCanonicalName();
+					errorMessage = response.getMessageError();
 				}
 				
 				log.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
 				deadLetterHelper(e);
-				String errorMessage = StringUtility.isNullOrEmpty(e.getMessage()) ? "Errore generico durante l'invocazione del client di eds" : e.getMessage();
+				
+				if(StringUtility.isNullOrEmpty(e.getMessage())) {
+					errorMessage = "Errore generico durante l'invocazione del client di eds";	
+				}
 				if(kafkaConsumerPropertiesCFG.getDeadLetterExceptions().contains(canonicalName)) {
 					log.debug("Dead letter Exception : " + canonicalName);
 					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR, errorMessage);
