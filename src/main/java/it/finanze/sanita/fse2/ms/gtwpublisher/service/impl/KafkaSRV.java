@@ -94,6 +94,10 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 						throw new UnknownException("Test exception");
 					}
 					
+					if("EXCEPTION_GTW_EDS_BLOCKING".equals(valueInfo.getIdDoc()) && profileUtility.isDevOrDockerProfile()) {
+						throw new BlockingEdsException("Test exception");
+					}
+					
 					
 					if (valueInfo.getEdsDPOperation().equals(ProcessorOperationEnum.PUBLISH)) {
 						response = edsClient.sendPublicationData(valueInfo, priorityType);
