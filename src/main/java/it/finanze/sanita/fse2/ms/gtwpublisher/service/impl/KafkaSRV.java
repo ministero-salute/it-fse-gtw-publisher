@@ -90,11 +90,11 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 			try {
 				if(!StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
 					
-					if("EXCEPTION_GTW_EDS_UNKNOWN".equals(valueInfo.getIdDoc()) && profileUtility.isDevOrDockerProfile()) {
+					if(valueInfo.getIdDoc().contains("EXCEPTION_GTW_EDS_UNKNOWN") && profileUtility.isDevOrDockerProfile()) {
 						throw new UnknownException("Test exception");
 					}
 					
-					if("EXCEPTION_GTW_EDS_BLOCKING".equals(valueInfo.getIdDoc()) && profileUtility.isDevOrDockerProfile()) {
+					if(valueInfo.getIdDoc().contains("EXCEPTION_GTW_EDS_BLOCKING") && profileUtility.isDevOrDockerProfile()) {
 						throw new BlockingEdsException("Test exception");
 					}
 					
