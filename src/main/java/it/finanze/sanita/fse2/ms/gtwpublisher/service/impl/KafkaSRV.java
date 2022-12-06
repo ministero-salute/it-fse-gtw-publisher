@@ -30,7 +30,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.KafkaAbstractSRV;
-import it.finanze.sanita.fse2.ms.gtwpublisher.utility.ProfileUtility;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,9 +52,6 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
 	@Autowired
 	private transient KafkaTopicCFG topicCFG;
-
-	@Autowired
-	private transient ProfileUtility profileUtility;
 
 	@Autowired
 	private transient KafkaConsumerPropertiesCFG kafkaConsumerPropertiesCFG;
@@ -120,9 +116,8 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 						response = edsClient.sendReplaceData(valueInfo);
 					}
 
-					boolean testEnvironment = profileUtility.isTestProfile() || profileUtility.isDevOrDockerProfile();
-					if (Boolean.TRUE.equals(response.getEsito()) || testEnvironment) {
-						esito = testEnvironment || response.getEsito();
+					if (Boolean.TRUE.equals(response.getEsito())) {
+						esito = response.getEsito();
 						log.debug("Successfully sent data to EDS for workflow instance id" + valueInfo.getWorkflowInstanceId(), OperationLogEnum.SEND_EDS, ResultLogEnum.OK, startDateOperation);
 						sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType , EventStatusEnum.SUCCESS, null);
 					} else {
@@ -145,7 +140,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 				
 				log.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
 				deadLetterHelper(e);
-				String errorMessage = StringUtility.isNullOrEmpty(e.getMessage()) ? "Errore generico durante l'invocazione del client di ini" : e.getMessage();
+				String errorMessage = StringUtility.isNullOrEmpty(e.getMessage()) ? "Errore generico durante l'invocazione del client di eds" : e.getMessage();
 				if(kafkaConsumerPropertiesCFG.getDeadLetterExceptions().contains(canonicalName)) {
 					log.debug("Dead letter Exception : " + canonicalName);
 					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR, errorMessage);
@@ -204,7 +199,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					eventType(eventType).
 					eventDate(new Date()).
 					eventStatus(eventStatus).
-					exception(exception).
+					message(exception).
 					build();
 			String json = StringUtility.toJSONJackson(statusManagerMessage);
 			sendMessage(topicCFG.getStatusManagerTopic(), workflowInstanceId, json, true);

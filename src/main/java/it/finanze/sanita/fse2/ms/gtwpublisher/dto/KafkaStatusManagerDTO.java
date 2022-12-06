@@ -27,6 +27,7 @@ public class KafkaStatusManagerDTO extends AbstractDTO {
 	
 	private EventStatusEnum eventStatus;
 	
-	private String exception;
+	private String message;
+	
 }
  
