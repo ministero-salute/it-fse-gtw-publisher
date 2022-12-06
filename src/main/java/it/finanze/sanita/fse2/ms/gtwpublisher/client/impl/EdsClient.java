@@ -65,7 +65,7 @@ public class EdsClient implements IEdsClient {
 			throw rax;
 		} catch(Exception ex) {
 			log.error("Generic error while call eds client ep: ", ex);
-			throw new BusinessException("Generic error while call eds client ep: ", ex);
+			throw ex;
 		}
 		return out;
 	}
