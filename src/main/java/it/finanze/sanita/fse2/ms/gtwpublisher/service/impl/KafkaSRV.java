@@ -35,30 +35,23 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 
- *
  * Kafka management service.
  */
 @Service
 @Slf4j
 public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
-	/**
-	 * Serial version uid.
-	 */
-	private static final long serialVersionUID = 987723954716001270L;
-
 	@Autowired
 	private IEdsClient edsClient;
 
 	@Autowired
-	private transient KafkaTopicCFG topicCFG;
+	private KafkaTopicCFG topicCFG;
 
 	@Autowired
-	private transient ProfileUtility profileUtility;
+	private ProfileUtility profileUtility;
 
 	@Autowired
-	private transient KafkaConsumerPropertiesCFG kafkaConsumerPropertiesCFG;
+	private KafkaConsumerPropertiesCFG kafkaConsumerPropertiesCFG;
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
@@ -145,7 +138,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 				
 				log.error("Error sending data to EDS", OperationLogEnum.SEND_EDS, ResultLogEnum.KO, startDateOperation);
 				deadLetterHelper(e);
-				String errorMessage = StringUtility.isNullOrEmpty(e.getMessage()) ? "Errore generico durante l'invocazione del client di ini" : e.getMessage();
+				String errorMessage = StringUtility.isNullOrEmpty(e.getMessage()) ? "Errore generico durante l'invocazione del client di eds" : e.getMessage();
 				if(kafkaConsumerPropertiesCFG.getDeadLetterExceptions().contains(canonicalName)) {
 					log.debug("Dead letter Exception : " + canonicalName);
 					sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR, errorMessage);

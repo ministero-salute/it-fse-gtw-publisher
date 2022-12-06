@@ -27,22 +27,17 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Production implemention of Eds Client.
- * 
  */
 @Slf4j
 @Component 
 public class EdsClient implements IEdsClient {
 
-    /**
-	 * Serial version uid.
-	 */
-	private static final long serialVersionUID = -1470125906483650945L;
 
 	@Autowired
-    private transient RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 	
 	@Autowired
-	private transient MicroservicesURLCFG msUrlCFG;
+	private MicroservicesURLCFG msUrlCFG;
 
 	@Override
 	public EdsPublicationResponseDTO sendPublicationData(final IndexerValueDTO valueInfo, final PriorityTypeEnum priorityType) {
