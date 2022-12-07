@@ -147,7 +147,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					counter++;
 					log.debug("Generic Exception : " + canonicalName + " Retry:" + counter +" di" + kafkaConsumerPropertiesCFG.getNRetry());
 					if(counter==kafkaConsumerPropertiesCFG.getNRetry()) {
-						sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR, "Massimo numero di retry raggiunto :" + errorMessage);
+						sendStatusMessage(valueInfo.getWorkflowInstanceId(), eventType, EventStatusEnum.BLOCKING_ERROR_MAX_RETRY, "Massimo numero di retry raggiunto :" + errorMessage);
 						throw new BlockingEdsException("Numero massimo di retry raggiunto" , e);
 					}
 				}
