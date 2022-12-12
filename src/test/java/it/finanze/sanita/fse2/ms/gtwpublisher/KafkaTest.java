@@ -98,41 +98,6 @@ class KafkaTest {
 		assertDoesNotThrow(()->kafkaSRV.highPriorityListenerIndexer(recordHigh, headers));
 	}
 
-	@Test
-	@Description("Publish - error test on indexer listener - do nothing")
-	void kafkaListenerIndexerErrorTest() {
-		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
-		String topicMedium = kafkaTopicCFG.getIndexerPublisherMediumPriorityTopic();
-		String topicHigh = kafkaTopicCFG.getIndexerPublisherHighPriorityTopic();
-
-		Map<String, Object> map = new HashMap<>();
-		MessageHeaders headers = new MessageHeaders(map);
-
-		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
-
-		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
-		records.put(new TopicPartition(topicMedium, 0), new ArrayList<>());
-		records.put(new TopicPartition(topicHigh, 0), new ArrayList<>());
-
-		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"PUBLISH\"}";
-
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
-		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<String,String>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
-		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<String,String>(topicHigh, 1, 0, StringUtility.generateUUID(), value);
-
-		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
-		mockResponse.setEsito(false);
-		mockResponse.setMessageError("Errore generico");
-
-		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-		assertDoesNotThrow(()->kafkaSRV.mediumPriorityListenerIndexer(recordMedium, headers));
-		assertDoesNotThrow(()->kafkaSRV.highPriorityListenerIndexer(recordHigh, headers));
-	}
-
- 
     @Test
 	@Description("Send data to gtw-eds-client")
     @Disabled("Real test")
@@ -163,32 +128,6 @@ class KafkaTest {
 
 		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
 		mockResponse.setEsito(true);
-
-		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
-
-		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-	}
-
-	@Test
-	@Description("Replace - error test on indexer listener - do nothing")
-	void kafkaReplaceListenerIndexerErrorTest() {
-		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
-
-		Map<String, Object> map = new HashMap<>();
-		MessageHeaders headers = new MessageHeaders(map);
-
-		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
-
-		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
-
-		final String value = "{\"workflowInstanceId\":\"wii1\",\"idDoc\":\"id1\",\"edsDPOperation\":\"REPLACE\"}";
-
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
-
-		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
-		mockResponse.setEsito(false);
-		mockResponse.setMessageError("Errore generico");
 
 		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
 				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
