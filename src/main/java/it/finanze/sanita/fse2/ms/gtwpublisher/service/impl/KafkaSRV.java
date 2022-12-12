@@ -28,10 +28,8 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BlockingEdsException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.UnknownException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.KafkaAbstractSRV;
-import it.finanze.sanita.fse2.ms.gtwpublisher.utility.ProfileUtility;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,8 +49,6 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	@Autowired
 	private KafkaConsumerPropertiesCFG kafkaConsumerPropertiesCFG;
 	
-	@Autowired
-	private ProfileUtility profileUtility;
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
@@ -89,15 +85,6 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		while(Boolean.FALSE.equals(esito) && counter<=kafkaConsumerPropertiesCFG.getNRetry()) {
 			try {
 				if(!StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
-					
-					if(valueInfo.getIdDoc().contains("EXCEPTION_GTW_EDS_UNKNOWN") && profileUtility.isDevOrDockerProfile()) {
-						throw new UnknownException("Test exception");
-					}
-					
-					if(valueInfo.getIdDoc().contains("EXCEPTION_GTW_EDS_BLOCKING") && profileUtility.isDevOrDockerProfile()) {
-						throw new BlockingEdsException("Test exception");
-					}
-					
 					
 					if (valueInfo.getEdsDPOperation().equals(ProcessorOperationEnum.PUBLISH)) {
 						response = edsClient.sendPublicationData(valueInfo, priorityType);
