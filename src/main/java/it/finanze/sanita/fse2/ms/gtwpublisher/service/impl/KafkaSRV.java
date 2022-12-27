@@ -8,6 +8,7 @@ import java.util.Date;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,9 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
 	@Autowired
 	private KafkaConsumerPropertiesCFG kafkaConsumerPropertiesCFG;
+	
+	@Value("${spring.application.name}")
+	private String msName;
 	
 
 	@Override
@@ -182,6 +186,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					eventDate(new Date()).
 					eventStatus(eventStatus).
 					message(exception).
+					microserviceName(msName).
 					build();
 			String json = StringUtility.toJSONJackson(statusManagerMessage);
 			sendMessage(topicCFG.getStatusManagerTopic(), workflowInstanceId, json, true);

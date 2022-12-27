@@ -10,12 +10,6 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=false)
 public class DocumentResponseDTO extends ResponseDTO { 
 
-	/**
-	 * Serial Version UID 
-	 */
-	private static final long serialVersionUID = 21641554325694264L; 
-	
-	
 	private String transactionId;
 
 	public DocumentResponseDTO() {
