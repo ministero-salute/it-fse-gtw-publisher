@@ -29,6 +29,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BlockingEdsException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.gtwpublisher.service.IAccreditamentoSimulationSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.KafkaAbstractSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
@@ -49,6 +50,9 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
 	@Autowired
 	private KafkaConsumerPropertiesCFG kafkaConsumerPropertiesCFG;
+	
+	@Autowired
+	private IAccreditamentoSimulationSRV accreditamentoSimSRV;
 	
 	@Value("${spring.application.name}")
 	private String msName;
@@ -89,7 +93,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		while(Boolean.FALSE.equals(esito) && counter<=kafkaConsumerPropertiesCFG.getNRetry()) {
 			try {
 				if(!StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
-					
+					accreditamentoSimSRV.runSimulation(valueInfo.getIdDoc());
 					if (valueInfo.getEdsDPOperation().equals(ProcessorOperationEnum.PUBLISH)) {
 						response = edsClient.sendPublicationData(valueInfo, priorityType);
 					} else {
