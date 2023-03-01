@@ -111,7 +111,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		String request = cr.value();
 		T req;
 		boolean exit = false;
-		// Convert to delete request
+		// Convert request
 		try {
 			// Get object
 			req = new Gson().fromJson(request, clazz);
@@ -126,7 +126,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		// ====================
 		// Retry iterations
 		// ====================
-		Exception ex = new Exception("Errore generico durante l'invocazione del client di ini");
+		Exception ex = new Exception("Errore generico durante l'invocazione del client di eds");
 		// Iterate
 		for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
 			try {
