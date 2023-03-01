@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EdsPublicationResponseDTO {
+public class EdsTraceResponseDTO {
 
 	private Boolean esito;
 

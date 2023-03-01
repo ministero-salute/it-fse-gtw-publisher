@@ -5,7 +5,10 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +19,11 @@ import lombok.Data;
  */
 @Data
 @Component
+@Slf4j
 public class KafkaConsumerPropertiesCFG implements Serializable {
 
-	/**
+	public static final int MAX_ATTEMPT = 5;
+    /**
 	 * Serial version uid.
 	 */
 	private static final long serialVersionUID = 4863316988401046567L;
@@ -107,5 +112,41 @@ public class KafkaConsumerPropertiesCFG implements Serializable {
 	 */
 	@Value("#{${kafka.consumer.temporary-exc}}")
 	private List<String> temporaryExceptions;
+
+	public Optional<EventStatusEnum> asExceptionType(Exception e) {
+		// Retrieve exception identifier
+		EventStatusEnum status = null;
+
+		String identifier = e.getClass().getCanonicalName();
+		// Identify
+		if(deadLetterExceptions.contains(identifier)) status = EventStatusEnum.BLOCKING_ERROR;
+		if(temporaryExceptions.contains(identifier)) status = EventStatusEnum.NON_BLOCKING_ERROR;
+		// Return
+		return Optional.ofNullable(status);
+	}
+
+	public void deadLetterHelper(Exception e) {
+		StringBuilder sb = new StringBuilder("LIST OF USEFUL EXCEPTIONS TO MOVE TO DEADLETTER OFFSET 'kafka.consumer.dead-letter-exc'. ");
+		boolean continua = true;
+		Throwable excTmp = e;
+		Throwable excNext = null;
+
+		while (continua) {
+			if (excNext != null) {
+				excTmp = excNext;
+				sb.append(", ");
+			}
+
+			sb.append(excTmp.getClass().getCanonicalName());
+			excNext = excTmp.getCause();
+
+			if (excNext == null) {
+				continua = false;
+			}
+
+		}
+
+		log.error("{}", sb);
+	}
 
 }

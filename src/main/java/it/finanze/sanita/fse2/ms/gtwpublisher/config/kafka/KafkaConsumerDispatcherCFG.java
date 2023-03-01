@@ -69,20 +69,19 @@ public class KafkaConsumerDispatcherCFG extends KafkaConsumerCFG {
 	/**
 	 * Factory with dead letter configuration.
 	 * 
-	 * @param deadLetterKafkaTemplate
 	 * @return	factory
 	 */
 	@Bean
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaDispatcherListenerDeadLetterContainerFactory(final @Qualifier("notxkafkadeadtemplate") KafkaTemplate<Object, Object> deadLetterKafkaTemplate) {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactoryDispatcher());
-		
+		factory.getContainerProperties().setDeliveryAttemptHeader(true);
 		// Definizione nome topic deadLetter
 		log.debug("TOPIC definition: {}", kafkaTopicCFG.getDispatcherPublisherDeadLetterTopic());
 		DeadLetterPublishingRecoverer dlpr = new DeadLetterPublishingRecoverer(deadLetterKafkaTemplate, (record, ex) -> new TopicPartition(kafkaTopicCFG.getDispatcherPublisherDeadLetterTopic(), -1));
 		
 		// Set classificazione errori da gestire per la deadLetter.
-		DefaultErrorHandler sceh = new DefaultErrorHandler(dlpr, new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS));
+		DefaultErrorHandler sceh = new DefaultErrorHandler(dlpr, new FixedBackOff());
 		
 		log.debug("Setting factory dead letter classification");
 		setClassification(sceh);
@@ -96,14 +95,12 @@ public class KafkaConsumerDispatcherCFG extends KafkaConsumerCFG {
 	/**
 	 * Default Container factory.
 	 * 
-	 * @param kafkaTemplate	templete
 	 * @return				factory
 	 */
 	@Bean
-	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactoryDispatcher(final @Qualifier("notxkafkatemplate") KafkaTemplate<String, String> kafkaTemplate) {
+	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactoryDispatcher() {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactoryDispatcher());
-		
 		return factory;
 	}
 }

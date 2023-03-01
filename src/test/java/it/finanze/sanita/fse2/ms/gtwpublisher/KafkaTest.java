@@ -3,19 +3,17 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.gson.Gson;
+import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.TopicPartition;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,22 +27,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.test.context.EmbeddedKafka;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.gson.Gson;
-
-import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
-import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
-import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
-import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan(basePackages = {Constants.ComponentScan.BASE})
@@ -71,31 +59,22 @@ class KafkaTest {
 		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
 		String topicMedium = kafkaTopicCFG.getIndexerPublisherMediumPriorityTopic();
 		String topicHigh = kafkaTopicCFG.getIndexerPublisherHighPriorityTopic();
-
-		Map<String, Object> map = new HashMap<>();
-		MessageHeaders headers = new MessageHeaders(map);
-
-		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
-
-		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
-		records.put(new TopicPartition(topicMedium, 0), new ArrayList<>());
-		records.put(new TopicPartition(topicHigh, 0), new ArrayList<>());
 		
 		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, "String", ProcessorOperationEnum.PUBLISH));
 
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
-		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<String,String>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
-		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<String,String>(topicHigh, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordLow = new ConsumerRecord<>(topicLow, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordHigh = new ConsumerRecord<>(topicHigh, 1, 0, StringUtility.generateUUID(), value);
 
-		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
+		EdsTraceResponseDTO mockResponse = new EdsTraceResponseDTO();
 		mockResponse.setEsito(true);
 
 		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
+				.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(EdsTraceResponseDTO.class));
 
-		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
-		assertDoesNotThrow(()->kafkaSRV.mediumPriorityListenerIndexer(recordMedium, headers));
-		assertDoesNotThrow(()->kafkaSRV.highPriorityListenerIndexer(recordHigh, headers));
+		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, 0));
+		assertDoesNotThrow(()->kafkaSRV.mediumPriorityListenerIndexer(recordMedium, 0));
+		assertDoesNotThrow(()->kafkaSRV.highPriorityListenerIndexer(recordHigh, 0));
 	}
 
     @Test
@@ -115,24 +94,17 @@ class KafkaTest {
 	void kafkaReplaceListenerIndexerSuccessTest() {
 		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
 
-		Map<String, Object> map = new HashMap<>();
-		MessageHeaders headers = new MessageHeaders(map);
-
-		Map<TopicPartition, List<ConsumerRecord<String, String>>> records = new LinkedHashMap<>();
-
-		records.put(new TopicPartition(topicLow, 0), new ArrayList<>());
-
 		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, "String", ProcessorOperationEnum.REPLACE));
 
-		ConsumerRecord<String, String> recordLow = new ConsumerRecord<String,String>(topicLow, 1, 0, StringUtility.generateUUID(), value);
+		ConsumerRecord<String, String> recordLow = new ConsumerRecord<>(topicLow, 1, 0, StringUtility.generateUUID(), value);
 
-		EdsPublicationResponseDTO mockResponse = new EdsPublicationResponseDTO();
+		EdsTraceResponseDTO mockResponse = new EdsTraceResponseDTO();
 		mockResponse.setEsito(true);
 
 		Mockito.doReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK)).when(restTemplate)
-				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsPublicationResponseDTO.class));
+				.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(EdsTraceResponseDTO.class));
 
-		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, headers));
+		assertDoesNotThrow(()->kafkaSRV.lowPriorityListenerIndexer(recordLow, 0));
 	}
 
 }

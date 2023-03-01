@@ -18,7 +18,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.MicroservicesURLCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.PublicationRequestBodyDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsPublicationResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.ConnectionRefusedException;
@@ -40,9 +40,9 @@ public class EdsClient implements IEdsClient {
 	private MicroservicesURLCFG msUrlCFG;
 
 	@Override
-	public EdsPublicationResponseDTO sendPublicationData(final IndexerValueDTO valueInfo, final PriorityTypeEnum priorityType) {
+	public EdsTraceResponseDTO sendPublicationData(final IndexerValueDTO valueInfo, final PriorityTypeEnum priorityType) {
 
-		EdsPublicationResponseDTO out = new EdsPublicationResponseDTO();
+		EdsTraceResponseDTO out = new EdsTraceResponseDTO();
 		try {
 			log.debug("EDS Client - Callind EDS to send data for publishing");
 			HttpHeaders headers = new HttpHeaders();
@@ -55,9 +55,9 @@ public class EdsClient implements IEdsClient {
 
 			HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
 
-			ResponseEntity<EdsPublicationResponseDTO> response = null;
+			ResponseEntity<EdsTraceResponseDTO> response;
 
-			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + "/v1/documents", HttpMethod.POST, entity, EdsPublicationResponseDTO.class);
+			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + "/v1/documents", HttpMethod.POST, entity, EdsTraceResponseDTO.class);
 			out = response.getBody();
 			log.debug("{} status returned from Fhir mapping Client", response.getStatusCode());
 		} catch (ResourceAccessException rax) {
@@ -72,21 +72,21 @@ public class EdsClient implements IEdsClient {
 
 
 	@Override
-	public EdsPublicationResponseDTO sendReplaceData(IndexerValueDTO valueInfo) {
+	public EdsTraceResponseDTO sendReplaceData(IndexerValueDTO valueInfo) {
 		if(StringUtility.isNullOrEmpty(valueInfo.getIdDoc()) || StringUtility.isNullOrEmpty(valueInfo.getWorkflowInstanceId())) {
 			throw new BusinessException("workflowInstanceId or identifier of document to update is null or empty");
 		}
 
-		EdsPublicationResponseDTO out = new EdsPublicationResponseDTO();
+		EdsTraceResponseDTO out = new EdsTraceResponseDTO();
 		log.debug("EDS Client - Calling eds client to execute update of document with id: {}", valueInfo.getIdDoc());
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 
 		HttpEntity<?> entity = new HttpEntity<>(new Gson().toJson(valueInfo), headers);
 
-		ResponseEntity<EdsPublicationResponseDTO> response = null;
+		ResponseEntity<EdsTraceResponseDTO> response;
 		try {
-			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + "/v1/documents/" + valueInfo.getIdDoc(), HttpMethod.PUT, entity, EdsPublicationResponseDTO.class);
+			response = restTemplate.exchange(msUrlCFG.getEdsClientHost() + "/v1/documents/" + valueInfo.getIdDoc(), HttpMethod.PUT, entity, EdsTraceResponseDTO.class);
 			out = response.getBody();
 			log.debug("{} status returned from Fhir mapping Client", response.getStatusCode());
 		} catch (ResourceAccessException | ConnectionRefusedException cex) {

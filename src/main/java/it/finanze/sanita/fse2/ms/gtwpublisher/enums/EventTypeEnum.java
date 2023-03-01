@@ -6,11 +6,12 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
 
 public enum EventTypeEnum {
 
-	SEND_TO_EDS("SEND_TO_EDS");
+	SEND_TO_EDS("SEND_TO_EDS"),
+	DESERIALIZE("DESERIALIZE");
 
-	private String name;
+	private final String name;
 
-	private EventTypeEnum(String inName) {
+	EventTypeEnum(String inName) {
 		name = inName;
 	}
 
