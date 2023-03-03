@@ -7,6 +7,7 @@ import com.google.gson.Gson;
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.base.ClientCallback;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.AccreditationSimulationCFG;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaConsumerPropertiesCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaStatusManagerDTO;
@@ -70,21 +71,21 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
 		log.debug("Listening with {} priority", LOW.getDescription());
-		loop(cr, IndexerValueDTO.class, (req) ->  publishAndReplace(req, LOW), delivery);
+		loop(cr, (req) ->  publishAndReplace(req, LOW), delivery);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
 		log.debug("Listening with {} priority", MEDIUM.getDescription());
-		loop(cr, IndexerValueDTO.class, (req) ->  publishAndReplace(req, MEDIUM), delivery);
+		loop(cr, (req) ->  publishAndReplace(req, MEDIUM), delivery);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
 		log.debug("Listening with {} priority", HIGH.getDescription());
-		loop(cr, IndexerValueDTO.class, (req) ->  publishAndReplace(req, HIGH), delivery);
+		loop(cr, (req) ->  publishAndReplace(req, HIGH), delivery);
 	}
 	
 	private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto, PriorityTypeEnum priority) {
@@ -101,22 +102,24 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		return response;
 	}
 
-	private <T> void loop(ConsumerRecord<String, String> cr, Class<T> clazz, ClientCallback<T, EdsTraceResponseDTO> cb, int delivery) throws Exception {
+	private void loop(ConsumerRecord<String, String> cr, ClientCallback<IndexerValueDTO, EdsTraceResponseDTO> cb, int delivery) throws Exception {
 
 		// ====================
 		// Deserialize request
 		// ====================
 		// Retrieve request body
-		String wif = cr.key();
+		String wif = Constants.MISSING_WORKFLOW_PLACEHOLDER;
 		String request = cr.value();
-		T req;
+		IndexerValueDTO req;
 		boolean exit = false;
 		// Convert request
 		try {
 			// Get object
-			req = new Gson().fromJson(request, clazz);
+			req = new Gson().fromJson(request, IndexerValueDTO.class);
 			// Require not null
 			Objects.requireNonNull(req, "The request payload cannot be null");
+			// Assign wif
+			wif = req.getWorkflowInstanceId();
 		} catch (Exception e) {
 			log.error("Unable to deserialize request with wif {} due to: {}", wif, e.getMessage());
 			sendStatusMessage(wif, DESERIALIZE, BLOCKING_ERROR, request);

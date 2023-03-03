@@ -10,6 +10,8 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.config;
  */
 public final class Constants {
 
+	public static final String MISSING_WORKFLOW_PLACEHOLDER = "UNKNOWN_WORKFLOW_ID";
+
 	/**
 	 *	Path scan.
 	 */
@@ -19,32 +21,11 @@ public final class Constants {
 		 * Base path.
 		 */
 		public static final String BASE = "it.finanze.sanita.fse2.ms.gtwpublisher";
-
-		/**
-		 * Controller path.
-		 */
-		public static final String CONTROLLER = "it.finanze.sanita.fse2.ms.gtwpublisher.controller";
-
-		/**
-		 * Service path.
-		 */
-		public static final String SERVICE = "it.finanze.sanita.fse2.ms.gtwpublisher.service";
-
-		/**
-		 * Configuration path.
-		 */
-		public static final String CONFIG = "it.finanze.sanita.fse2.ms.gtwpublisher.config";
 		
 		/**
 		 * Configuration mongo path.
 		 */
 		public static final String CONFIG_MONGO = "it.finanze.sanita.fse2.ms.gtwpublisher.config.mongo";
-		
-		/**
-		 * Configuration mongo repository path.
-		 */
-		public static final String REPOSITORY_MONGO = "it.finanze.sanita.fse2.ms.gtwpublisher.repository";
-
 		
 		private ComponentScan() {
 			//This method is intentionally left blank.
