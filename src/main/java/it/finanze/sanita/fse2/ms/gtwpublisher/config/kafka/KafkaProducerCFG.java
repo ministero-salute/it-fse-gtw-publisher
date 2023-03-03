@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaProducerCFG {
 
+	public static final int MAX_ATTEMPT = 5;
 
 	/**
 	 *	Kafka properties.
@@ -71,10 +72,6 @@ public class KafkaProducerCFG {
 		return props;
 	}
 
-	/**
-	 * @param id
-	 * @return
-	 */
 	private InetAddress getLocalHost() {
 		InetAddress id = null;
 		try {

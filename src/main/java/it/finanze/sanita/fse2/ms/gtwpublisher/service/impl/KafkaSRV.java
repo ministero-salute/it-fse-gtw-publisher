@@ -9,6 +9,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.client.base.ClientCallback;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.AccreditationSimulationCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaConsumerPropertiesCFG;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaProducerCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaStatusManagerDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
@@ -155,7 +156,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					// Get type [BLOCKING or NON_BLOCKING_ERROR]
 					EventStatusEnum status = type.get();
 					// Send to kafka
-					if (delivery <= KafkaConsumerPropertiesCFG.MAX_ATTEMPT) {
+					if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
 						// Send to kafka
 						sendStatusMessage(wif, SEND_TO_EDS, status, e.getMessage());
 					}
