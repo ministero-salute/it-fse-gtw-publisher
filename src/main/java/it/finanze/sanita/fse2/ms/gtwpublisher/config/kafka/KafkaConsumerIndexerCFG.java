@@ -76,7 +76,7 @@ public class KafkaConsumerIndexerCFG extends KafkaConsumerCFG {
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaIndexerListenerDeadLetterContainerFactory(final @Qualifier("notxkafkadeadtemplate") KafkaTemplate<Object, Object> deadLetterKafkaTemplate) {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactoryIndexer());
-		
+		factory.getContainerProperties().setDeliveryAttemptHeader(true);
 		// Definizione nome topic deadLetter
 		log.debug("TOPIC definition: " + kafkaTopicCFG.getIndexerPublisherDeadLetterTopic());
 		DeadLetterPublishingRecoverer dlpr = new DeadLetterPublishingRecoverer(deadLetterKafkaTemplate, (record, ex) -> new TopicPartition(kafkaTopicCFG.getIndexerPublisherDeadLetterTopic(), -1));
