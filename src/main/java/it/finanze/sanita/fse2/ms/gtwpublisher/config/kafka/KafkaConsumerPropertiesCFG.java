@@ -88,12 +88,6 @@ public class KafkaConsumerPropertiesCFG {
 	private List<String> deadLetterExceptions;
 
 	/**
-	 * Flag enable ssl.
-	 */
-	@Value("${kafka.enablessl}")
-	private boolean enableSsl;
-	
-	/**
 	 * Kafka retry.
 	 */
 	@Value("${kafka.retry}")

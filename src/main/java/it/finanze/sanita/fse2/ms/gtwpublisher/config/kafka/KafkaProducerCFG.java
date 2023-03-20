@@ -18,6 +18,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -61,11 +62,23 @@ public class KafkaProducerCFG {
 		props.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,kafkaProducerPropCFG.getIdempotence());
 
 		//SSL
-		if(kafkaPropCFG.isEnableSSL()) {
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getProtocol())) {
 			props.put("security.protocol", kafkaPropCFG.getProtocol());
+		}
+
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getMechanism())) {
 			props.put("sasl.mechanism", kafkaPropCFG.getMechanism());
+		}
+
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getConfigJaas())) {
 			props.put("sasl.jaas.config", kafkaPropCFG.getConfigJaas());
+		}
+
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getTrustoreLocation())) {
 			props.put("ssl.truststore.location", kafkaPropCFG.getTrustoreLocation());  
+		}
+
+		if(!StringUtility.isNullOrEmpty(String.valueOf(kafkaPropCFG.getTrustorePassword()))) {
 			props.put("ssl.truststore.password", String.valueOf(kafkaPropCFG.getTrustorePassword())); 
 		}
 
@@ -107,7 +120,7 @@ public class KafkaProducerCFG {
 	@Bean 
 	public Map<String, Object> producerWithoutTransactionConfigs() {
 		Map<String, Object> props = new HashMap<>();
-		
+
 		props.put(ProducerConfig.CLIENT_ID_CONFIG, kafkaProducerPropCFG.getClientId()+ "-noTx");
 		props.put(ProducerConfig.RETRIES_CONFIG, kafkaProducerPropCFG.getRetries());
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProducerPropCFG.getProducerBootstrapServers());
@@ -115,11 +128,23 @@ public class KafkaProducerCFG {
 		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, kafkaProducerPropCFG.getValueSerializer());
 
 		//SSL
-		if(kafkaPropCFG.isEnableSSL()) {
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getProtocol())) {
 			props.put("security.protocol", kafkaPropCFG.getProtocol());
+		}
+		
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getMechanism())) {
 			props.put("sasl.mechanism", kafkaPropCFG.getMechanism());
+		}
+		
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getConfigJaas())) {
 			props.put("sasl.jaas.config", kafkaPropCFG.getConfigJaas());
+		}
+		
+		if(!StringUtility.isNullOrEmpty(kafkaPropCFG.getTrustoreLocation())) {
 			props.put("ssl.truststore.location", kafkaPropCFG.getTrustoreLocation());
+		}
+		
+		if(!StringUtility.isNullOrEmpty(String.valueOf(kafkaPropCFG.getTrustorePassword()))) {
 			props.put("ssl.truststore.password", String.valueOf(kafkaPropCFG.getTrustorePassword())); 
 		}
 

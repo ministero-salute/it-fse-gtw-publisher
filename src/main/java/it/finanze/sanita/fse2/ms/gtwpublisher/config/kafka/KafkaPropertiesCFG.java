@@ -60,10 +60,4 @@ public class KafkaPropertiesCFG implements Serializable {
 	@Value("${kafka.properties.ssl.truststore.password}")
 	private transient char[] trustorePassword;
 	 
-	/**
-	 * Enable Ssl flag.
-	 */
-	@Value("${kafka.enablessl}")
-	private boolean enableSSL;
-	
 }

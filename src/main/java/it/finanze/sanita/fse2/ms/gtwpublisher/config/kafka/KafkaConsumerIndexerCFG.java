@@ -24,6 +24,7 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -60,12 +61,24 @@ public class KafkaConsumerIndexerCFG  {
 		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, kafkaConsumerPropCFG.getAutoCommit());
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaConsumerPropCFG.getAutoOffsetReset());
 
-		// SSL
-		if (kafkaConsumerPropCFG.isEnableSsl()) {
+
+		if(!StringUtility.isNullOrEmpty(kafkaProps.getProtocol())) {
 			props.put("security.protocol", kafkaProps.getProtocol());
+		}
+
+		if(!StringUtility.isNullOrEmpty(kafkaProps.getMechanism())) {
 			props.put("sasl.mechanism", kafkaProps.getMechanism());
+		}
+
+		if(!StringUtility.isNullOrEmpty(kafkaProps.getConfigJaas())) {
 			props.put("sasl.jaas.config", kafkaProps.getConfigJaas());
+		}
+
+		if(!StringUtility.isNullOrEmpty(kafkaProps.getTrustoreLocation())) {
 			props.put("ssl.truststore.location", kafkaProps.getTrustoreLocation());
+		}
+
+		if(!StringUtility.isNullOrEmpty(String.valueOf(kafkaProps.getTrustorePassword()))) {
 			props.put("ssl.truststore.password", String.valueOf(kafkaProps.getTrustorePassword()));
 		}
 
@@ -95,13 +108,13 @@ public class KafkaConsumerIndexerCFG  {
 		// Definizione nome topic deadLetter
 		log.debug("TOPIC definition: " + kafkaTopicCFG.getIndexerPublisherDeadLetterTopic());
 		DeadLetterPublishingRecoverer dlpr = new DeadLetterPublishingRecoverer(deadLetterKafkaTemplate, (record, ex) -> new TopicPartition(kafkaTopicCFG.getIndexerPublisherDeadLetterTopic(), -1));
-		
+
 		// Set classificazione errori da gestire per la deadLetter.
 		DefaultErrorHandler sceh = new DefaultErrorHandler(dlpr, new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS));
-		
+
 		log.debug("Kafka dead letter classification");
 		setClassification(sceh);
-		
+
 		// da eliminare se non si volesse gestire la dead letter
 		factory.setCommonErrorHandler(sceh); 
 
@@ -112,7 +125,7 @@ public class KafkaConsumerIndexerCFG  {
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactoryIndexer() {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactoryIndexer());
-		
+
 		return factory;
 	}
 
