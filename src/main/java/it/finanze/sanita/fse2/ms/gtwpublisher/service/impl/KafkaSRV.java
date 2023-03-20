@@ -187,7 +187,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					microserviceName(msName).
 					build();
 			String json = StringUtility.toJSONJackson(statusManagerMessage);
-			sendMessage(topicCFG.getStatusManagerTopic(), workflowInstanceId, json, true);
+			sendMessage(topicCFG.getStatusManagerTopic(), workflowInstanceId, json);
 		} catch(Exception ex) {
 			log.error("Error while send status message on indexer : " , ex);
 			throw new BusinessException(ex);
