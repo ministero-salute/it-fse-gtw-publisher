@@ -73,7 +73,7 @@ public class KafkaPropertiesCFG implements Serializable {
 	public AdminClient client() {
 		Properties configProperties = new Properties();
     	configProperties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, producerBootstrapServers);
-    	if(profileUtility.isDevOrDockerProfile() && !profileUtility.isTestProfile()) {
+    	if(!profileUtility.isDevOrDockerProfile() && !profileUtility.isTestProfile()) {
     		configProperties.put("security.protocol", protocol);
     		configProperties.put("sasl.mechanism", mechanism);
     		configProperties.put("sasl.jaas.config", configJaas);
