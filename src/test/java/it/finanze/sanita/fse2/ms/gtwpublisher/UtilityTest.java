@@ -156,6 +156,7 @@ class UtilityTest {
 	@DisplayName("Json Utility - Test KO")
 	void jsonUtilityTestKo() {
 		DocumentResponseDTO dto = new DocumentResponseDTO(); 
+		DocumentResponseDTO dto2 = new DocumentResponseDTO(new LogTraceInfoDTO(TEST_SPAN_ID, TEST_TRACE_ID), "transaction_id");
 		dto.setSpanID(TEST_SPAN_ID); 
 		dto.setTraceID(TEST_TRACE_ID); 
 		
@@ -163,15 +164,18 @@ class UtilityTest {
 		ResponseDTO responseDto = new ResponseDTO(logTraceInfoDto); 
 		
 		String jsonAsString = JsonUtility.objectToJson(dto); 
+		String jsonAsString2 = JsonUtility.objectToJson(dto2); 
 		KafkaMessageDTO convertedDto = JsonUtility.jsonToObject(jsonAsString, KafkaMessageDTO.class); 
+		KafkaMessageDTO convertedDto2 = JsonUtility.jsonToObject(jsonAsString2, KafkaMessageDTO.class); 
 		
 		String jsonAsStringResponseDto = JsonUtility.objectToJson(responseDto); 
 		KafkaMessageDTO convertedResponseDto = JsonUtility.jsonToObject(jsonAsStringResponseDto, KafkaMessageDTO.class); 
 		
 		assertNull(convertedDto); 
+		assertNull(convertedDto2); 
 		assertNull(convertedResponseDto); 
 		
-	} 
+	}
 
     @Test
     @DisplayName("jsonToObject OK")
@@ -220,7 +224,6 @@ class UtilityTest {
 		
 		assertEquals(String.class, uuid.getClass()); 
 	}
-	
 
 } 
 

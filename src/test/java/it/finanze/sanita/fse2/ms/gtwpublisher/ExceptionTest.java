@@ -15,7 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BlockingEdsException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.ConnectionRefusedException;
+import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.UnknownException;
 
 
 class ExceptionTest {
@@ -26,7 +29,6 @@ class ExceptionTest {
 		
 		assertEquals(BusinessException.class, exc.getClass()); 
 		assertEquals("Error", exc.getMessage()); 
-		
 	} 
 	
 	@Test
@@ -34,8 +36,61 @@ class ExceptionTest {
 		BusinessException exc = new BusinessException(new RuntimeException()); 
 		
 		assertEquals(BusinessException.class, exc.getClass()); 
-		
 	} 
 
+	@Test
+	void blockingEdsExceptionTest() {
+		BlockingEdsException exc = new BlockingEdsException("Error"); 
+		
+		assertEquals(BlockingEdsException.class, exc.getClass()); 
+		assertEquals("Error", exc.getMessage()); 
+	} 
+	
+	@Test
+	void blockingEdsExceptionWithMsgExcTest() {
+		BlockingEdsException exc = new BlockingEdsException("Error", new RuntimeException()); 
+		
+		assertEquals(BlockingEdsException.class, exc.getClass()); 
+		assertEquals("Error", exc.getMessage()); 
+	}
+	
+	@Test
+	void blockingEdsExceptionTestWithoutMsg() {
+		BlockingEdsException exc = new BlockingEdsException(new RuntimeException()); 
+		
+		assertEquals(BlockingEdsException.class, exc.getClass()); 
+	} 
+	
+	@Test
+	void connectionRefusedExceptionTest() {
+		String url = "testUrl";
+		ConnectionRefusedException exc = new ConnectionRefusedException(url, "message"); 
+		
+		assertEquals(ConnectionRefusedException.class, exc.getClass());
+		assertEquals(url, exc.getUrl());
+	} 
+	
+	@Test
+	void unknownExceptionTest() {
+		UnknownException exc = new UnknownException("Error"); 
+		
+		assertEquals(UnknownException.class, exc.getClass()); 
+		assertEquals("Error", exc.getMessage()); 
+	} 
+	
+	@Test
+	void unknownExceptionWithMsgExcTest() {
+		UnknownException exc = new UnknownException("Error", new RuntimeException()); 
+		
+		assertEquals(UnknownException.class, exc.getClass()); 
+		assertEquals("Error", exc.getMessage()); 
+	} 
+	
+	@Test
+	void unknownExceptionTestWithoutMsg() {
+		UnknownException exc = new UnknownException(new RuntimeException()); 
+		
+		assertEquals(UnknownException.class, exc.getClass());
+	} 
 	
 } 
