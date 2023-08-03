@@ -12,8 +12,6 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.config;
 
 /**
- * 
- *
  * Constants application.
  */
 public final class Constants {

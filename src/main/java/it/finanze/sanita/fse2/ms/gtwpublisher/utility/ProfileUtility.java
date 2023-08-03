@@ -20,6 +20,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 
 @Component
 public class ProfileUtility {
+	
     @Autowired
     private Environment environment;
 

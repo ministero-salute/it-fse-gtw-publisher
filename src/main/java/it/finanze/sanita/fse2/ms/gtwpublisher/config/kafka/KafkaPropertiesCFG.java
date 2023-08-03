@@ -11,7 +11,6 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka;
 
-import java.io.Serializable;
 import java.util.Properties;
 
 import org.apache.kafka.clients.admin.AdminClient;
@@ -30,13 +29,8 @@ import lombok.Data;
  */
 @Data
 @Configuration
-public class KafkaPropertiesCFG implements Serializable {
+public class KafkaPropertiesCFG {
   
-	/**
-	 *  Serial version uid
-	 */
-	private static final long serialVersionUID = -7936473659737067416L;
-
 	/**
 	 *  Boostrap server.
 	 */

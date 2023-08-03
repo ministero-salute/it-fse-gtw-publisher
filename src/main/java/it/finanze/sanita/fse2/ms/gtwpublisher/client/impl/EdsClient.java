@@ -40,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component 
 public class EdsClient implements IEdsClient {
 
-
 	@Autowired
     private RestTemplate restTemplate;
 	

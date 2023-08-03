@@ -26,17 +26,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StringUtility {
 
-	/**
-	 * Private constructor to avoid instantiation.
-	 */
-	private StringUtility() {
-		// Constructor intentionally empty.
-	}
 
 	/**
 	 * Returns {@code true} if the String passed as parameter is null or empty.

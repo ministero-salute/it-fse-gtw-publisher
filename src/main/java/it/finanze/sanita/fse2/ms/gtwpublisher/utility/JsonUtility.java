@@ -12,23 +12,17 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.utility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  *
  */
 @Slf4j
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonUtility {
-
-
-    /**
-     * Private constructor to avoid instantiation.
-     *
-     * @throws IllegalStateException
-     */
-    private JsonUtility() {
-//		throw new IllegalStateException("Questa è una classe di utilità non va istanziata!!!");
-    }
 
     private static ObjectMapper mapper = new ObjectMapper();
 
