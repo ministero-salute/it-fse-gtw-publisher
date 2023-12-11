@@ -9,23 +9,19 @@
  * 
  * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
- 
+package it.finanze.sanita.fse2.ms.gtwpublisher.client;
 
-public enum EventTypeEnum {
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.FhirPublisherResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 
-	SEND_TO_EDS("SEND_TO_EDS"),
-	SEND_TO_PNT("SEND_TO_PNT"),
-	DESERIALIZE("DESERIALIZE");
 
-	private final String name;
+/**
+ * Interface of Eds client.
+ */
+public interface IFhirPublisherClient {
 
-	EventTypeEnum(String inName) {
-		name = inName;
-	}
+    FhirPublisherResponseDTO sendPublicationData(IndexerValueDTO valueInfo, PriorityTypeEnum priorityType);
 
-	public String getName() {
-		return name;
-	}
-
+    FhirPublisherResponseDTO sendReplaceData(IndexerValueDTO valueInfo);
 }

@@ -17,6 +17,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.client.impl.RestTemplateResponseErrorHandler;
+
 @SpringBootApplication
 public class GtwPublisherMsApplication {
 
@@ -32,6 +34,8 @@ public class GtwPublisherMsApplication {
 	@Bean
 	@Qualifier("restTemplate")
 	public RestTemplate restTemplate() {
-		return new RestTemplate();
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new RestTemplateResponseErrorHandler());
+		return restTemplate;
 	}
 }

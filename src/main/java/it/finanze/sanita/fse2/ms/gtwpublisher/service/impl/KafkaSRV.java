@@ -11,8 +11,31 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher.service.impl;
 
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.BLOCKING_ERROR;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.BLOCKING_ERROR_MAX_RETRY;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.SUCCESS;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum.DESERIALIZE;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum.SEND_TO_PNT;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.HIGH;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.LOW;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.MEDIUM;
+import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum.PUBLISH;
+
+import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.stereotype.Service;
+
 import com.google.gson.Gson;
-import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
+
+import it.finanze.sanita.fse2.ms.gtwpublisher.client.IFhirPublisherClient;
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.base.ClientCallback;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.AccreditationSimulationCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
@@ -21,7 +44,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaProducerCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.KafkaStatusManagerDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.FhirPublisherResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
@@ -32,23 +55,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.KafkaAbstractSRV;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.Objects;
-import java.util.Optional;
-
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.*;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum.DESERIALIZE;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum.SEND_TO_EDS;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.*;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum.PUBLISH;
 
 /**
  * Kafka management service.
@@ -57,8 +63,11 @@ import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnu
 @Slf4j
 public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
+//	@Autowired
+//	private IEdsClient edsClient;
+
 	@Autowired
-	private IEdsClient edsClient;
+	private IFhirPublisherClient fhirPublisherClient;
 
 	@Autowired
 	private KafkaTopicCFG topicCFG;
@@ -80,38 +89,50 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
 		log.debug("Listening with {} priority", LOW.getDescription());
-		loop(cr, (req) ->  publishAndReplace(req, LOW), delivery);
+		loop(cr, (req) ->  publishAndReplaceFhirPublisher(req, LOW), delivery);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
 		log.debug("Listening with {} priority", MEDIUM.getDescription());
-		loop(cr, (req) ->  publishAndReplace(req, MEDIUM), delivery);
+		loop(cr, (req) ->  publishAndReplaceFhirPublisher(req, MEDIUM), delivery);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
 		log.debug("Listening with {} priority", HIGH.getDescription());
-		loop(cr, (req) ->  publishAndReplace(req, HIGH), delivery);
+		loop(cr, (req) ->  publishAndReplaceFhirPublisher(req, HIGH), delivery);
 	}
 	
-	private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto, PriorityTypeEnum priority) {
+	private FhirPublisherResponseDTO publishAndReplaceFhirPublisher(IndexerValueDTO dto, PriorityTypeEnum priority) {
 
-		if(accreditamentoSimulationCFG.isEnableCheck()) accreditamentoSimSRV.runSimulation(dto.getIdDoc());
-
-		EdsTraceResponseDTO response;
+		FhirPublisherResponseDTO response;
 		if (dto.getEdsDPOperation().equals(PUBLISH)) {
-			response = edsClient.sendPublicationData(dto, priority);
+			response = fhirPublisherClient.sendPublicationData(dto, priority);
 		} else {
-			response = edsClient.sendReplaceData(dto);
+			response = fhirPublisherClient.sendReplaceData(dto);
 		}
 
 		return response;
 	}
+	
+//	private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto, PriorityTypeEnum priority) {
+//
+//		if(accreditamentoSimulationCFG.isEnableCheck()) accreditamentoSimSRV.runSimulation(dto.getIdDoc());
+//
+//		EdsTraceResponseDTO response;
+//		if (dto.getEdsDPOperation().equals(PUBLISH)) {
+//			response = fhirPublisherClient.sendPublicationData(dto, priority);
+//		} else {
+//			response = fhirPublisherClient.sendReplaceData(dto);
+//		}
+//
+//		return response;
+//	}
 
-	private void loop(ConsumerRecord<String, String> cr, ClientCallback<IndexerValueDTO, EdsTraceResponseDTO> cb, int delivery) throws Exception {
+	private void loop(ConsumerRecord<String, String> cr, ClientCallback<IndexerValueDTO, FhirPublisherResponseDTO> cb, int delivery) throws Exception {
 
 		// ====================
 		// Deserialize request
@@ -143,10 +164,10 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
 			try {
 				// Execute request
-				EdsTraceResponseDTO res = cb.request(req);
+				FhirPublisherResponseDTO res = cb.request(req);
 				// Everything has been resolved
 				if (Boolean.TRUE.equals(res.getEsito())) {
-					sendStatusMessage(wif, SEND_TO_EDS, SUCCESS, new Gson().toJson(res));
+					sendStatusMessage(wif, SEND_TO_PNT, SUCCESS, new Gson().toJson(res));
 				} else {
 					throw new BlockingEdsException(res.getMessageError());
 				}
@@ -166,7 +187,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 					// Send to kafka
 					if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
 						// Send to kafka
-						sendStatusMessage(wif, SEND_TO_EDS, status, e.getMessage());
+						sendStatusMessage(wif, SEND_TO_PNT, status, e.getMessage());
 					}
 					// We are going re-process it
 					throw e;
@@ -177,7 +198,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 		// We didn't exit properly from the loop,
 		// We reached the max amount of retries
 		if(!exit) {
-			sendStatusMessage(wif, SEND_TO_EDS, BLOCKING_ERROR_MAX_RETRY, "Massimo numero di retry raggiunto: " + ex.getMessage());
+			sendStatusMessage(wif, SEND_TO_PNT, BLOCKING_ERROR_MAX_RETRY, "Massimo numero di retry raggiunto: " + ex.getMessage());
 			throw new BlockingEdsException(ex.getMessage());
 		}
 

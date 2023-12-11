@@ -9,23 +9,21 @@
  * 
  * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
- 
+package it.finanze.sanita.fse2.ms.gtwpublisher.dto.response;
 
-public enum EventTypeEnum {
 
-	SEND_TO_EDS("SEND_TO_EDS"),
-	SEND_TO_PNT("SEND_TO_PNT"),
-	DESERIALIZE("DESERIALIZE");
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-	private final String name;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class FhirPublisherResponseDTO {
 
-	EventTypeEnum(String inName) {
-		name = inName;
-	}
+	private Boolean esito;
 
-	public String getName() {
-		return name;
-	}
+	private String exClassCanonicalName;
 
+	private String messageError;
 }
