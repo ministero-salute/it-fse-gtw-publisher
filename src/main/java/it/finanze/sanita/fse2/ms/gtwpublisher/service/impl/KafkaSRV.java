@@ -79,21 +79,21 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-		log.debug("Listening with {} priority", LOW.getDescription());
+		log.info("Listening with {} priority", LOW.getDescription());
 		loop(cr, (req) ->  publishAndReplace(req, LOW), delivery);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-		log.debug("Listening with {} priority", MEDIUM.getDescription());
+		log.info("Listening with {} priority", MEDIUM.getDescription());
 		loop(cr, (req) ->  publishAndReplace(req, MEDIUM), delivery);
 	}
 
 	@Override
 	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
 	public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-		log.debug("Listening with {} priority", HIGH.getDescription());
+		log.info("Listening with {} priority", HIGH.getDescription());
 		loop(cr, (req) ->  publishAndReplace(req, HIGH), delivery);
 	}
 	
