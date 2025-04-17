@@ -103,36 +103,6 @@ class UtilityTest {
 		assertNotNull(convertion1);
 	}
 	
-	
-	@Test
-	@DisplayName("String utility HEX null -> exception")
-	void encodeSHA256HEXException() throws Exception{
-		
-		//exception encode
-		String convertion = null;
-		try {
-			convertion = StringUtility.encodeSHA256Hex(null);
-		} catch (Exception e) {
-			Assertions.assertNull(convertion);
-		}
-		assertThrows(BusinessException.class, () -> StringUtility.encodeSHA256Hex(null));
-	}
-	
-	@Test
-	@DisplayName("String utility 256 HEX-> OK")
-	void encodeSHA256HEXOk() {
-		//encode OK
-		String strToConvert = "0";
-		String convertion = StringUtility.encodeSHA256Hex(strToConvert);
-		assertNotNull(convertion);
-		//encode wrong case
-		String strToConvert2 = "1aa";
-		String convertion2 = StringUtility.encodeSHA256Hex(strToConvert2);
-		assertNotNull(convertion2);
-		
-	}
- 
-	
 	@Test
 	@DisplayName("tojsonjackson test")
 	void toJSONJacksonTest() {

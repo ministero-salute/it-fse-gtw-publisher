@@ -12,16 +12,11 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher;
 
-import com.google.gson.Gson;
-import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
-import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
-import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
-import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -38,10 +33,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.mockito.ArgumentMatchers.*;
+import com.google.gson.Gson;
+
+import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
+import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
+import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
+import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan(basePackages = {Constants.ComponentScan.BASE})
@@ -59,7 +64,7 @@ class KafkaTest {
 	@Autowired
 	private IEdsClient edsClient;
 
-    @SpyBean
+    @MockitoSpyBean
 	private RestTemplate restTemplate;
 
 	@Test

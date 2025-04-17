@@ -18,8 +18,6 @@ import java.util.Base64;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.apache.commons.codec.binary.Hex;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -69,23 +67,6 @@ public final class StringUtility {
 			throw new BusinessException("Error calculating SHA-256", e);
 		}
 	}
-	
-	/**
-	 * Returns the encoded String of the SHA-256 algorithm encoded represented in base hex.
-	 * 
-	 * @param objectToEncode String to encode.
-	 * @return String Encoded.
-	 */
-	public static String encodeSHA256Hex(String objectToEncode) {
-		try {
-		    final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		    final byte[] hash = digest.digest(objectToEncode.getBytes());
-		    return encodeHex(hash);
-		} catch (Exception e) {
-			log.error("Error calculating sha", e);
-			throw new BusinessException("Error calculating SHA-256", e);
-		}
-	}
 
 	/**
 	 * Encode in Base64 the byte array passed as parameter.
@@ -96,17 +77,7 @@ public final class StringUtility {
 	public static String encodeBase64(final byte[] input) {
 		return Base64.getEncoder().encodeToString(input);
 	}
-
-	/**
-	 * Encodes the byte array passed as parameter in hexadecimal.
-	 * 
-	 * @param input	The byte array to encode.
-	 * @return		The encoded byte array to String.
-	 */
-	public static String encodeHex(final byte[] input) {
-		return Hex.encodeHexString(input);
-	}
-
+ 
 	public static String generateUUID() {
 	    return UUID.randomUUID().toString();
 	}
