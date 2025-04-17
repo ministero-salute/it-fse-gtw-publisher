@@ -18,8 +18,6 @@ import java.util.Base64;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.apache.commons.codec.binary.Hex;
-
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -27,17 +25,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StringUtility {
 
-	/**
-	 * Private constructor to avoid instantiation.
-	 */
-	private StringUtility() {
-		// Constructor intentionally empty.
-	}
 
 	/**
 	 * Returns {@code true} if the String passed as parameter is null or empty.
@@ -71,23 +66,6 @@ public final class StringUtility {
 	}
 	
 	/**
-	 * Returns the encoded String of the SHA-256 algorithm encoded represented in base hex.
-	 * 
-	 * @param objectToEncode String to encode.
-	 * @return String Encoded.
-	 */
-	public static String encodeSHA256Hex(String objectToEncode) {
-		try {
-		    final MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		    final byte[] hash = digest.digest(objectToEncode.getBytes());
-		    return encodeHex(hash);
-		} catch (Exception e) {
-			log.error("Error calculating sha", e);
-			throw new BusinessException("Error calculating SHA-256", e);
-		}
-	}
-
-	/**
 	 * Encode in Base64 the byte array passed as parameter.
 	 * 
 	 * @param input	The byte array to encode.
@@ -97,16 +75,7 @@ public final class StringUtility {
 		return Base64.getEncoder().encodeToString(input);
 	}
 
-	/**
-	 * Encodes the byte array passed as parameter in hexadecimal.
-	 * 
-	 * @param input	The byte array to encode.
-	 * @return		The encoded byte array to String.
-	 */
-	public static String encodeHex(final byte[] input) {
-		return Hex.encodeHexString(input);
-	}
-
+	 
 	public static String generateUUID() {
 	    return UUID.randomUUID().toString();
 	}
