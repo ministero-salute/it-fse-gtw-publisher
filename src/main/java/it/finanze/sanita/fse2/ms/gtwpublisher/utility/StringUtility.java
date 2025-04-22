@@ -64,7 +64,6 @@ public final class StringUtility {
 			throw new BusinessException("Error calculating SHA-256", e);
 		}
 	}
-	
 	/**
 	 * Encode in Base64 the byte array passed as parameter.
 	 * 
@@ -74,8 +73,7 @@ public final class StringUtility {
 	public static String encodeBase64(final byte[] input) {
 		return Base64.getEncoder().encodeToString(input);
 	}
-
-	 
+ 
 	public static String generateUUID() {
 	    return UUID.randomUUID().toString();
 	}

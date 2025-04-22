@@ -12,11 +12,13 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher.config;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
- * 
- *
  * Constants application.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Constants {
 
 	public static final String MISSING_WORKFLOW_PLACEHOLDER = "UNKNOWN_WORKFLOW_ID";
@@ -71,12 +73,11 @@ public final class Constants {
 		}
 
 	}
-  
-	/**
-	 *	Constants.
-	 */
-	private Constants() {
-
+	
+	@NoArgsConstructor(access = AccessLevel.PRIVATE)
+	public static final class Properties {
+		public static final String MS_NAME = "gtw-publisher";
+		 
 	}
-
+  
 }

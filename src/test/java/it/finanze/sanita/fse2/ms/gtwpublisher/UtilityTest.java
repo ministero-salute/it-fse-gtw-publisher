@@ -103,7 +103,6 @@ class UtilityTest {
 		assertNotNull(convertion1);
 	}
 	
-	
 	@Test
 	@DisplayName("tojsonjackson test")
 	void toJSONJacksonTest() {
