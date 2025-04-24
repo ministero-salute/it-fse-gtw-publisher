@@ -37,6 +37,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.DocumentResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.ResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
@@ -185,7 +186,8 @@ class UtilityTest {
 	void findAndSendToEdsByWorkflowInstanceIdKo() {
 		String workflowInstanceId = null;
 		PriorityTypeEnum priorityTypeEnum = PriorityTypeEnum.HIGH;
-		assertThrows(ResourceAccessException.class, ()->edsClient.sendPublicationData(new IndexerValueDTO(workflowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH), priorityTypeEnum));
+		assertThrows(ResourceAccessException.class, ()->edsClient.sendPublicationData(new IndexerValueDTO(workflowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH,DestinationEnum.SEND_TO_UAR), priorityTypeEnum,
+				DestinationEnum.SEND_TO_UAR));
 	}
 	
 	@Test

@@ -11,11 +11,12 @@
  * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
- 
+
 
 public enum EventTypeEnum {
 
-	SEND_TO_EDS("SEND_TO_EDS"),
+	SEND_TO_UAR("SEND_TO_UAR"),
+	SEND_TO_UDP("SEND_TO_UAR"),
 	DESERIALIZE("DESERIALIZE");
 
 	private final String name;
@@ -26,6 +27,15 @@ public enum EventTypeEnum {
 
 	public String getName() {
 		return name;
+	}
+
+	public static EventTypeEnum getEventTypeFromDestination(String destination) {
+		for (EventTypeEnum eventType : EventTypeEnum.values()) {
+			if (eventType.name().equalsIgnoreCase(destination)) {
+				return eventType;
+			}
+		}
+		throw new IllegalArgumentException("No enum constant for string: " + destination);
 	}
 
 }

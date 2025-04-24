@@ -13,6 +13,7 @@
 package it.finanze.sanita.fse2.ms.gtwpublisher.dto.request;
 
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,4 +39,6 @@ public class IndexerValueDTO {
      * Enum of the operation to perform on EDS
      */
     private ProcessorOperationEnum edsDPOperation;
+    
+    private DestinationEnum destination;
 }

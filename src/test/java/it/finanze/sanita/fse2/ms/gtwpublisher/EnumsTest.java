@@ -44,8 +44,8 @@ class EnumsTest {
     @Test
     @DisplayName("testEventTypeEnums")
     void testEventTypeEnums() {
-        String code = EventTypeEnum.SEND_TO_EDS.getName();
-        assertEquals(code, EventTypeEnum.SEND_TO_EDS.getName());
+        String code = EventTypeEnum.SEND_TO_UAR.getName();
+        assertEquals(code, EventTypeEnum.SEND_TO_UAR.getName());
     }
     
     @Test

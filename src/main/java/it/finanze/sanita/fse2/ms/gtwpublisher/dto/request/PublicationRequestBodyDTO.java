@@ -12,6 +12,7 @@
  */
 package it.finanze.sanita.fse2.ms.gtwpublisher.dto.request;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,4 +25,5 @@ public class PublicationRequestBodyDTO {
     private String workflowInstanceId;
     private String identificativoDoc;
     private PriorityTypeEnum priorityType;
+    private DestinationEnum destination;
 }

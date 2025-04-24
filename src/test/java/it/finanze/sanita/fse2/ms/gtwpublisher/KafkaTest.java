@@ -43,6 +43,7 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.kafka.KafkaTopicCFG;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
+import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IKafkaSRV;
@@ -74,7 +75,8 @@ class KafkaTest {
 		String topicMedium = kafkaTopicCFG.getIndexerPublisherMediumPriorityTopic();
 		String topicHigh = kafkaTopicCFG.getIndexerPublisherHighPriorityTopic();
 		
-		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, "String", ProcessorOperationEnum.PUBLISH));
+		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, "String", ProcessorOperationEnum.PUBLISH,
+				DestinationEnum.SEND_TO_UAR));
 
 		ConsumerRecord<String, String> recordLow = new ConsumerRecord<>(topicLow, 1, 0, StringUtility.generateUUID(), value);
 		ConsumerRecord<String, String> recordMedium = new ConsumerRecord<>(topicMedium, 1, 0, StringUtility.generateUUID(), value);
@@ -99,7 +101,7 @@ class KafkaTest {
         // paste a workflowInstanceId present in your ini_eds_invocation mongo collection
 
         String workFlowInstanceId = "2.16.840.1.113883.2.9.2.120.4.4.030702.TSTSMN63A01F205H.20220325112426.OQlvTq1J.dead66852ddb42dbbdf3556bcd87be02^^^^urn:ihe:iti:xdw:2013:workflowInstanceId";
-        edsClient.sendPublicationData(new IndexerValueDTO(workFlowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH), PriorityTypeEnum.HIGH);
+        edsClient.sendPublicationData(new IndexerValueDTO(workFlowInstanceId, "idDoc", ProcessorOperationEnum.PUBLISH,DestinationEnum.SEND_TO_UAR), PriorityTypeEnum.HIGH,DestinationEnum.SEND_TO_UAR);
 
     }
 
@@ -108,7 +110,7 @@ class KafkaTest {
 	void kafkaReplaceListenerIndexerSuccessTest() {
 		String topicLow = kafkaTopicCFG.getIndexerPublisherLowPriorityTopic();
 
-		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, "String", ProcessorOperationEnum.REPLACE));
+		final String value = new Gson().toJson(new IndexerValueDTO(TestConstants.testWorkflowInstanceId, "String", ProcessorOperationEnum.REPLACE,DestinationEnum.SEND_TO_UAR));
 
 		ConsumerRecord<String, String> recordLow = new ConsumerRecord<>(topicLow, 1, 0, StringUtility.generateUUID(), value);
 
