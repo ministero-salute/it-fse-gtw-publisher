@@ -21,7 +21,9 @@ import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.LOW;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.MEDIUM;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum.PUBLISH;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -64,156 +66,182 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
-	@Autowired
-	private IEdsClient edsClient;
+    @Autowired
+    private IEdsClient edsClient;
 
-	@Autowired
-	private KafkaTopicCFG topicCFG;
+    @Autowired
+    private KafkaTopicCFG topicCFG;
 
-	@Autowired
-	private KafkaConsumerPropertiesCFG kafkaConsumerPropCFG;
+    @Autowired
+    private KafkaConsumerPropertiesCFG kafkaConsumerPropCFG;
 
-	@Autowired
-	private IAccreditamentoSimulationSRV accreditamentoSimSRV;
+    @Autowired
+    private IAccreditamentoSimulationSRV accreditamentoSimSRV;
 
-	@Autowired
-	private AccreditationSimulationCFG accreditamentoSimulationCFG;
+    @Autowired
+    private AccreditationSimulationCFG accreditamentoSimulationCFG;
 
-	@Value("${spring.application.name}")
-	private String msName;
+    @Value("${spring.application.name}")
+    private String msName;
 
+    @Override
+    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
+    public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr,
+            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
+        log.info("Listening with {} priority", LOW.getDescription());
+        loop(cr, (req) -> publishAndReplace(req, LOW), delivery);
+    }
 
-	@Override
-	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
-	public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-		log.info("Listening with {} priority", LOW.getDescription());
-		loop(cr, (req) ->  publishAndReplace(req, LOW), delivery);
-	}
+    @Override
+    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
+    public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr,
+            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
+        log.info("Listening with {} priority", MEDIUM.getDescription());
+        loop(cr, (req) -> publishAndReplace(req, MEDIUM), delivery);
+    }
 
-	@Override
-	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
-	public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-		log.info("Listening with {} priority", MEDIUM.getDescription());
-		loop(cr, (req) ->  publishAndReplace(req, MEDIUM), delivery);
-	}
+    @Override
+    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
+    public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr,
+            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
+        log.info("Listening with {} priority", HIGH.getDescription());
+        loop(cr, (req) -> publishAndReplace(req, HIGH), delivery);
+    }
 
-	@Override
-	@KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
-	public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-		log.info("Listening with {} priority", HIGH.getDescription());
-		loop(cr, (req) ->  publishAndReplace(req, HIGH), delivery);
-	}
+    @Override
+    @KafkaListener(topics = "#{'${kafka.self-publisher.topic}'}", clientIdPrefix = "#{'${kafka.consumer.client-id-self-publisher}'}", containerFactory = "kafkaSelfPublisherDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-self-publisher}'}")
+    public void listenerSelfPublisher(ConsumerRecord<String, String> cr,
+            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
+        log.info("Listening message from self publisher...");
+        loop(cr, (req) -> publishAndReplace(req, LOW), delivery);
+    }
 
-	private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto, PriorityTypeEnum priority) {
+    private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto, PriorityTypeEnum priority) {
 
-		if(accreditamentoSimulationCFG.isEnableCheck()) accreditamentoSimSRV.runSimulation(dto.getIdDoc());
+        if (accreditamentoSimulationCFG.isEnableCheck())
+            accreditamentoSimSRV.runSimulation(dto.getIdDoc());
 
-		EdsTraceResponseDTO response;
+        EdsTraceResponseDTO response;
 
-		if (dto.getEdsDPOperation().equals(PUBLISH)) {
-			response = edsClient.sendPublicationData(dto, priority,dto.getDestination());
-		} else {
-			response = edsClient.sendReplaceData(dto);
-		}	
+        if (dto.getEdsDPOperation().equals(PUBLISH)) {
+            response = edsClient.sendPublicationData(dto, priority, dto.getDestination());
+        } else {
+            response = edsClient.sendReplaceData(dto);
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	private void loop(ConsumerRecord<String, String> cr, ClientCallback<IndexerValueDTO, EdsTraceResponseDTO> cb, int delivery) throws Exception {
+    private void loop(ConsumerRecord<String, String> cr, ClientCallback<IndexerValueDTO, EdsTraceResponseDTO> cb,
+            int delivery) throws Exception {
 
-		// ====================
-		// Deserialize request
-		// ====================
-		// Retrieve request body
-		String wif = Constants.MISSING_WORKFLOW_PLACEHOLDER;
-		String request = cr.value();
-		IndexerValueDTO req;
-		boolean exit = false;
-		// Convert request
-		try {
-			// Get object
-			req = new Gson().fromJson(request, IndexerValueDTO.class);
-			// Require not null
-			Objects.requireNonNull(req, "The request payload cannot be null");
-			// Assign wif
-			wif = req.getWorkflowInstanceId();
-		} catch (Exception e) {
-			log.error("Unable to deserialize request with wif {} due to: {}", wif, e.getMessage());
-			sendStatusMessage(wif, DESERIALIZE, BLOCKING_ERROR, request);
-			throw new BlockingEdsException(e.getMessage());
-		}
+        // ====================
+        // Deserialize request
+        // ====================
+        // Retrieve request body
+        String wif = Constants.MISSING_WORKFLOW_PLACEHOLDER;
+        String request = cr.value();
+        IndexerValueDTO req;
+        boolean exit = false;
+        // Convert request
+        try {
+            // Get object
+            req = new Gson().fromJson(request, IndexerValueDTO.class);
+            // Require not null
+            Objects.requireNonNull(req, "The request payload cannot be null");
+            // Assign wif
+            wif = req.getWorkflowInstanceId();
+        } catch (Exception e) {
+            log.error("Unable to deserialize request with wif {} due to: {}", wif, e.getMessage());
+            sendStatusMessage(wif, DESERIALIZE, BLOCKING_ERROR, request);
+            throw new BlockingEdsException(e.getMessage());
+        }
 
-		// ====================
-		// Retry iterations
-		// ====================
-		Exception ex = new Exception("Errore generico durante l'invocazione del client di eds");
-		
-		// Iterate
-		for(DestinationEnum dest : DestinationEnum.values()) {
-			EventTypeEnum eventType = EventTypeEnum.getEventTypeFromDestination(dest.name());
-			req.setDestination(dest);
-			for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
-				try {
-					// Execute request
-					EdsTraceResponseDTO res = cb.request(req);
-					// Everything has been resolved
-					if (Boolean.TRUE.equals(res.getEsito())) {
-						
-						sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
-					} else {
-						throw new BlockingEdsException(res.getMessageError());
-					}
-					// Quit flag
-					exit = true;
-				} catch (Exception e) {
-					// Assign
-					ex = e;
-					// Display help
-					kafkaConsumerPropCFG.deadLetterHelper(e);
-					// Try to identify the exception type
-					Optional<EventStatusEnum> type = kafkaConsumerPropCFG.asExceptionType(e);
-					// If we found it, we are good to make an action, otherwise, let's retry
-					if(type.isPresent()) {
-						// Get type [BLOCKING or NON_BLOCKING_ERROR]
-						EventStatusEnum status = type.get();
-						// Send to kafka
-						if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
-							// Send to kafka
-							sendStatusMessage(wif, eventType, status, e.getMessage());
-						}
-						// We are going re-process it
-						throw e;
-					}
-				}
-			}
-			
-			// We didn't exit properly from the loop,
-			// We reached the max amount of retries
-			if(!exit) {
-				sendStatusMessage(wif, eventType, BLOCKING_ERROR_MAX_RETRY, "Massimo numero di retry raggiunto: " + ex.getMessage());
-				throw new BlockingEdsException(ex.getMessage());
-			}
-			
-		}
+        // ====================
+        // Retry iterations
+        // ====================
+        Exception ex = new Exception("Errore generico durante l'invocazione del client di eds");
 
-	}
+        // Check if there is a specific destination
+        List<DestinationEnum> destinations = Arrays.asList(DestinationEnum.values());
+        if (req.getDestination() != null) {
+            // If there is a specific destination, it means the message is in
+            // re-processing phase
+            destinations = Arrays.asList(req.getDestination());
+        }
+        // Iterate
+        for (DestinationEnum dest : destinations) {
+            EventTypeEnum eventType = EventTypeEnum.getEventTypeFromDestination(dest.name());
+            req.setDestination(dest);
+            for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
+                try {
+                    // Execute request
+                    EdsTraceResponseDTO res = cb.request(req);
+                    // Everything has been resolved
+                    if (Boolean.TRUE.equals(res.getEsito())) {
 
-	@Override
-	public void sendStatusMessage(final String workflowInstanceId,final EventTypeEnum eventType,
-			final EventStatusEnum eventStatus, String exception) {
-		try {
-			KafkaStatusManagerDTO statusManagerMessage = KafkaStatusManagerDTO.builder().
-					eventType(eventType).
-					eventDate(new Date()).
-					eventStatus(eventStatus).
-					message(exception).
-					microserviceName(msName).
-					build();
-			String json = StringUtility.toJSONJackson(statusManagerMessage);
-			sendMessage(topicCFG.getStatusManagerTopic(), workflowInstanceId, json);
-		} catch(Exception ex) {
-			log.error("Error while send status message on indexer : " , ex);
-			throw new BusinessException(ex);
-		}
-	}
+                        sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
+                    } else {
+                        throw new BlockingEdsException(res.getMessageError());
+                    }
+                    // Quit flag
+                    exit = true;
+                } catch (Exception e) {
+                    // Assign
+                    ex = e;
+                    // Display help
+                    kafkaConsumerPropCFG.deadLetterHelper(e);
+                    // Try to identify the exception type
+                    Optional<EventStatusEnum> type = kafkaConsumerPropCFG.asExceptionType(e);
+                    // If we found it, we are good to make an action, otherwise, let's retry
+                    if (type.isPresent()) {
+                        // Get type [BLOCKING or NON_BLOCKING_ERROR]
+                        EventStatusEnum status = type.get();
+                        // Send to kafka
+                        if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
+                            // Send to kafka
+                            sendStatusMessage(wif, eventType, status, e.getMessage());
+                        }
+                    }
+                }
+            }
+
+            // We didn't exit properly from the loop,
+            // We reached the max amount of retries
+            if (!exit) {
+                sendStatusMessage(wif, eventType, BLOCKING_ERROR_MAX_RETRY,
+                        "Massimo numero di retry raggiunto: " + ex.getMessage());
+
+                // We are going to send a new message to Publisher for re-processing
+                sendSelfPublisherMessage(req);
+
+            }
+
+        }
+
+    }
+
+    public void sendSelfPublisherMessage(final IndexerValueDTO request) {
+        try {
+            String valueJson = StringUtility.toJSONJackson(request);
+            sendMessage(topicCFG.getSelfPublisherTopic(), request.getDestination().name(), valueJson);
+        } catch (Exception e) {
+            log.error("Error while send message on self publisher : ", e);
+            throw new BusinessException(e);
+        }
+    }
+
+    @Override
+    public void sendStatusMessage(final String workflowInstanceId, final EventTypeEnum eventType,
+            final EventStatusEnum eventStatus, String exception) {
+        try {
+            KafkaStatusManagerDTO statusManagerMessage = KafkaStatusManagerDTO.builder().eventType(eventType)
+                    .eventDate(new Date()).eventStatus(eventStatus).message(exception).microserviceName(msName).build();
+            String json = StringUtility.toJSONJackson(statusManagerMessage);
+            sendMessage(topicCFG.getStatusManagerTopic(), workflowInstanceId, json);
+        } catch (Exception ex) {
+            log.error("Error while send status message on indexer : ", ex);
+            throw new BusinessException(ex);
+        }
+    }
 }
