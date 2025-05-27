@@ -213,7 +213,12 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                         "Massimo numero di retry raggiunto: " + ex.getMessage());
 
                 // We are going to send a new message to Publisher for re-processing
-                sendSelfPublisherMessage(req);
+                if (dest == DestinationEnum.SEND_TO_UAR) {
+                    req.setDestination(null);
+                    sendSelfPublisherMessage(req);
+                } else if (dest == DestinationEnum.SEND_TO_UDP) {
+                    sendSelfPublisherMessage(req);
+                }
 
             }
 
