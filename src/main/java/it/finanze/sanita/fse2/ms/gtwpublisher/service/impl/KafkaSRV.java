@@ -21,9 +21,7 @@ import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.LOW;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.MEDIUM;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum.PUBLISH;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -163,63 +161,59 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         Exception ex = new Exception("Errore generico durante l'invocazione del client di eds");
 
         // Check if there is a specific destination
-        List<DestinationEnum> destinations = Arrays.asList(DestinationEnum.values());
+        DestinationEnum dest = DestinationEnum.SEND_TO_UAR;
         if (topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
-            // If there is a specific destination, it means the message is in
+            // If it comes from the self publisher topic, it means the message is in
             // re-processing phase
-            destinations = Arrays.asList(req.getDestination());
+            dest = DestinationEnum.SEND_TO_UDP;
         }
-        // Iterate
-        for (DestinationEnum dest : destinations) {
-            EventTypeEnum eventType = EventTypeEnum.getEventTypeFromDestination(dest.name());
-            req.setDestination(dest);
-            for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
-                try {
-                    // Execute request
-                    EdsTraceResponseDTO res = cb.request(req);
-                    // Everything has been resolved
-                    if (Boolean.TRUE.equals(res.getEsito())) {
 
-                        sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
-                    } else {
-                        throw new BlockingEdsException(res.getMessageError());
-                    }
-                    // Quit flag
-                    exit = true;
-                } catch (Exception e) {
-                    // Assign
-                    ex = e;
-                    // Display help
-                    kafkaConsumerPropCFG.deadLetterHelper(e);
-                    // Try to identify the exception type
-                    Optional<EventStatusEnum> type = kafkaConsumerPropCFG.asExceptionType(e);
-                    // If we found it, we are good to make an action, otherwise, let's retry
-                    if (type.isPresent()) {
-                        // Get type [BLOCKING or NON_BLOCKING_ERROR]
-                        EventStatusEnum status = type.get();
+        EventTypeEnum eventType = EventTypeEnum.getEventTypeFromDestination(dest.name());
+        req.setDestination(dest);
+        for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
+            try {
+                // Execute request
+                EdsTraceResponseDTO res = cb.request(req);
+                // Everything has been resolved
+                if (Boolean.TRUE.equals(res.getEsito())) {
+
+                    sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
+                } else {
+                    throw new BlockingEdsException(res.getMessageError());
+                }
+                // Quit flag
+                exit = true;
+                sendSelfPublisherMessage(req);
+
+            } catch (Exception e) {
+                // Assign
+                ex = e;
+                // Display help
+                kafkaConsumerPropCFG.deadLetterHelper(e);
+                // Try to identify the exception type
+                Optional<EventStatusEnum> type = kafkaConsumerPropCFG.asExceptionType(e);
+                // If we found it, we are good to make an action, otherwise, let's retry
+                if (type.isPresent()) {
+                    // Get type [BLOCKING or NON_BLOCKING_ERROR]
+                    EventStatusEnum status = type.get();
+                    // Send to kafka
+                    if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
                         // Send to kafka
-                        if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
-                            // Send to kafka
-                            sendStatusMessage(wif, eventType, status, e.getMessage());
-                        }
+                        sendStatusMessage(wif, eventType, status, e.getMessage());
                     }
+                    // We are going re-process it
+                    throw e;
                 }
             }
+        }
 
-            // We didn't exit properly from the loop,
-            // We reached the max amount of retries
-            if (!exit) {
-                sendStatusMessage(wif, eventType, BLOCKING_ERROR_MAX_RETRY,
-                        "Massimo numero di retry raggiunto: " + ex.getMessage());
+        // We didn't exit properly from the loop,
+        // We reached the max amount of retries
+        if (!exit) {
+            sendStatusMessage(wif, eventType, BLOCKING_ERROR_MAX_RETRY,
+                    "Massimo numero di retry raggiunto: " + ex.getMessage());
 
-                // We are going to send a new message to Publisher for re-processing
-                if (dest == DestinationEnum.SEND_TO_UAR) {
-                    throw new BlockingEdsException(ex.getMessage());
-                } else if (dest == DestinationEnum.SEND_TO_UDP) {
-                    sendSelfPublisherMessage(req);
-                }
-
-            }
+            throw new BlockingEdsException(ex.getMessage());
 
         }
 
