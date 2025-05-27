@@ -164,7 +164,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
         // Check if there is a specific destination
         List<DestinationEnum> destinations = Arrays.asList(DestinationEnum.values());
-        if (req.getDestination() != null) {
+        if (topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
             // If there is a specific destination, it means the message is in
             // re-processing phase
             destinations = Arrays.asList(req.getDestination());
@@ -214,8 +214,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
                 // We are going to send a new message to Publisher for re-processing
                 if (dest == DestinationEnum.SEND_TO_UAR) {
-                    req.setDestination(null);
-                    sendSelfPublisherMessage(req);
+                    throw new BlockingEdsException(ex.getMessage());
                 } else if (dest == DestinationEnum.SEND_TO_UDP) {
                     sendSelfPublisherMessage(req);
                 }
