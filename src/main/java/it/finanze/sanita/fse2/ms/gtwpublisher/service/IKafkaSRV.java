@@ -18,21 +18,11 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
 
 public interface IKafkaSRV {
-
-    /**
-     * Kafka listener for Indexer communications in low priority
-     */
-    void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr, int delivery) throws Exception;
-
-    /**
-     * Kafka listener for Indexer communications in medium priority
-     */
-    void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr, int delivery) throws Exception;
-
-    /**
-     * Kafka listener for Indexer communications in high priority
-     */
-    void highPriorityListenerIndexer(ConsumerRecord<String, String> cr, int delivery) throws Exception;
+ 
+	/**
+	 * Kafka listener for Indexer communications
+	 */
+	void basicListenerIndexer(ConsumerRecord<String, String> cr, int delivery) throws Exception;
 
     /**
      * Send status message to respective topic

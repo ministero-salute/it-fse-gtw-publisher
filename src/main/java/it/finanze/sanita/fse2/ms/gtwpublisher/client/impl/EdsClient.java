@@ -29,7 +29,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.PublicationRequestBodyDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.ConnectionRefusedException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.StringUtility;
@@ -50,7 +49,8 @@ public class EdsClient implements IEdsClient {
 	private MicroservicesURLCFG msUrlCFG;
 
 	@Override
-	public EdsTraceResponseDTO sendPublicationData(final IndexerValueDTO valueInfo, final PriorityTypeEnum priorityType, DestinationEnum destinationEnum) {
+	public EdsTraceResponseDTO sendPublicationData(final IndexerValueDTO valueInfo,
+			DestinationEnum destinationEnum) {
 
 		EdsTraceResponseDTO out = new EdsTraceResponseDTO();
 		try {
@@ -61,7 +61,6 @@ public class EdsClient implements IEdsClient {
 			PublicationRequestBodyDTO requestBody = new PublicationRequestBodyDTO();
 			requestBody.setIdentificativoDoc(valueInfo.getIdDoc());
 			requestBody.setWorkflowInstanceId(valueInfo.getWorkflowInstanceId());
-			requestBody.setPriorityType(priorityType);
 			requestBody.setDestination(destinationEnum);
 
 			HttpEntity<?> entity = new HttpEntity<>(requestBody, headers);
