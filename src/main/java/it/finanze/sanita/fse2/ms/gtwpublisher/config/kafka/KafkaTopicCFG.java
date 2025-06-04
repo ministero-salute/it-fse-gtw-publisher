@@ -32,53 +32,36 @@ public class KafkaTopicCFG {
     @Autowired
     private ProfileUtility profileUtility;
 
-    /**
-     * Topic.
-     */
-    @Value("${kafka.indexer-publisher.topic.low-priority}")
-    private String indexerPublisherLowPriorityTopic;
+	/**
+	 * Topic.
+	 */
+	@Value("${kafka.indexer-publisher.topic}")
+	private String indexerPublisherTopic;
 
-    /**
-     * Topic.
-     */
-    @Value("${kafka.indexer-publisher.topic.medium-priority}")
-    private String indexerPublisherMediumPriorityTopic;
+	/**
+	 * Dead letter topic.
+	 */
+	@Value("${kafka.indexer-publisher.deadletter.topic}")
+	private String indexerPublisherDeadLetterTopic;
 
-    /**
-     * Topic.
-     */
-    @Value("${kafka.indexer-publisher.topic.high-priority}")
-    private String indexerPublisherHighPriorityTopic;
+	/**
+	 * Topic.
+	 */
+	@Value("${kafka.dispatcher-publisher.base-topic}")
+	private String dispatcherPublisherTopic;
 
-    /**
-     * Dead letter topic.
-     */
-    @Value("${kafka.indexer-publisher.deadletter.topic}")
-    private String indexerPublisherDeadLetterTopic;
+	/**
+	 * Dead letter topic.
+	 */
+	@Value("${kafka.dispatcher-publisher.deadletter.topic}")
+	private String dispatcherPublisherDeadLetterTopic;
 
-    /**
-     * Topic.
-     */
-    @Value("${kafka.dispatcher-publisher.topic.low-priority}")
-    private String dispatcherPublisherLowPriorityTopic;
+	/**
+	 * Status Manager topic.
+	 */
+	@Value("${kafka.statusmanager.topic}")
+	private String statusManagerTopic;
 
-    /**
-     * Topic.
-     */
-    @Value("${kafka.dispatcher-publisher.topic.medium-priority}")
-    private String dispatcherPublisherMediumPriorityTopic;
-
-    /**
-     * Topic.
-     */
-    @Value("${kafka.dispatcher-publisher.topic.high-priority}")
-    private String dispatcherPublisherHighPriorityTopic;
-
-    /**
-     * Dead letter topic.
-     */
-    @Value("${kafka.dispatcher-publisher.deadletter.topic}")
-    private String dispatcherPublisherDeadLetterTopic;
 
     @Value("${kafka.self-publisher.topic}")
     private String selfPublisherTopic;
@@ -86,30 +69,21 @@ public class KafkaTopicCFG {
     @Value("${kafka.self-publisher.deadletter.topic}")
     private String selfPublisherDeadLetterTopic;
 
-    /**
-     * Status Manager topic.
-     */
-    @Value("${kafka.statusmanager.topic}")
-    private String statusManagerTopic;
 
     @PostConstruct
     public void afterInit() {
         if (profileUtility.isTestProfile()) {
-            this.dispatcherPublisherLowPriorityTopic = Constants.Profile.TEST_PREFIX
-                    + this.dispatcherPublisherLowPriorityTopic;
-            this.dispatcherPublisherMediumPriorityTopic = Constants.Profile.TEST_PREFIX
-                    + this.dispatcherPublisherMediumPriorityTopic;
-            this.dispatcherPublisherHighPriorityTopic = Constants.Profile.TEST_PREFIX
-                    + this.dispatcherPublisherHighPriorityTopic;
+			this.indexerPublisherTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherTopic;
+			this.indexerPublisherDeadLetterTopic =
+					Constants.Profile.TEST_PREFIX + this.indexerPublisherDeadLetterTopic;
+			this.dispatcherPublisherTopic =
+					Constants.Profile.TEST_PREFIX + this.dispatcherPublisherTopic;
             this.dispatcherPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX
-                    + this.dispatcherPublisherDeadLetterTopic;
-            this.indexerPublisherLowPriorityTopic = Constants.Profile.TEST_PREFIX
-                    + this.indexerPublisherLowPriorityTopic;
-            this.indexerPublisherMediumPriorityTopic = Constants.Profile.TEST_PREFIX
-                    + this.indexerPublisherMediumPriorityTopic;
-            this.indexerPublisherHighPriorityTopic = Constants.Profile.TEST_PREFIX
-                    + this.indexerPublisherHighPriorityTopic;
-            this.statusManagerTopic = Constants.Profile.TEST_PREFIX + this.statusManagerTopic;
+					+ this.dispatcherPublisherDeadLetterTopic;
+			this.statusManagerTopic = Constants.Profile.TEST_PREFIX + this.statusManagerTopic;
+			this.selfPublisherTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherTopic;
+			this.selfPublisherDeadLetterTopic =
+					Constants.Profile.TEST_PREFIX + this.selfPublisherDeadLetterTopic;
         }
     }
 }

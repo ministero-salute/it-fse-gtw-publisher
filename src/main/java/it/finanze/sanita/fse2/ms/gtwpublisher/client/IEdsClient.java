@@ -15,7 +15,6 @@ package it.finanze.sanita.fse2.ms.gtwpublisher.client;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.request.IndexerValueDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 
 
 /**
@@ -23,7 +22,8 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
  */
 public interface IEdsClient {
 
-    EdsTraceResponseDTO sendPublicationData(IndexerValueDTO valueInfo, PriorityTypeEnum priorityType, DestinationEnum destinationEnum);
+    EdsTraceResponseDTO sendPublicationData(IndexerValueDTO valueInfo,
+            DestinationEnum destinationEnum);
 
     EdsTraceResponseDTO sendReplaceData(IndexerValueDTO valueInfo);
 }

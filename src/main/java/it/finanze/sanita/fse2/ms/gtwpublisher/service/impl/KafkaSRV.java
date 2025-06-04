@@ -16,9 +16,6 @@ import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.BLOCK
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.BLOCKING_ERROR_MAX_RETRY;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.SUCCESS;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum.DESERIALIZE;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.HIGH;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.LOW;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.MEDIUM;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum.PUBLISH;
 
 import java.util.Date;
@@ -48,7 +45,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.EdsTraceResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BlockingEdsException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.service.IAccreditamentoSimulationSRV;
@@ -83,27 +79,15 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
     private String msName;
 
     @Override
-    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.low-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.low}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
-    public void lowPriorityListenerIndexer(ConsumerRecord<String, String> cr,
+    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic}'}",
+            clientIdPrefix = "#{'${kafka.consumer.indexer.client-id}'}",
+            containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory",
+            autoStartup = "${event.topic.auto.start}",
+            groupId = "#{'${kafka.consumer.group-id-indexer}'}")
+    public void basicListenerIndexer(ConsumerRecord<String, String> cr,
             @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-        log.info("Listening with {} priority", LOW.getDescription());
-        loop(cr, (req) -> publishAndReplace(req, LOW), delivery);
-    }
-
-    @Override
-    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.medium-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.medium}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
-    public void mediumPriorityListenerIndexer(ConsumerRecord<String, String> cr,
-            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-        log.info("Listening with {} priority", MEDIUM.getDescription());
-        loop(cr, (req) -> publishAndReplace(req, MEDIUM), delivery);
-    }
-
-    @Override
-    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic.high-priority}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id-priority.high}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
-    public void highPriorityListenerIndexer(ConsumerRecord<String, String> cr,
-            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-        log.info("Listening with {} priority", HIGH.getDescription());
-        loop(cr, (req) -> publishAndReplace(req, HIGH), delivery);
+        log.info("Processing Kafka Event: {}", cr.key());
+        loop(cr, (req) -> publishAndReplace(req), delivery);
     }
 
     @Override
@@ -111,18 +95,19 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
     public void listenerSelfPublisher(ConsumerRecord<String, String> cr,
             @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
         log.info("Listening message from self publisher...");
-        loop(cr, (req) -> publishAndReplace(req, LOW), delivery);
+        loop(cr, (req) -> publishAndReplace(req), delivery);
     }
 
-    private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto, PriorityTypeEnum priority) {
+    private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto) {
 
-        if (accreditamentoSimulationCFG.isEnableCheck())
+        if (accreditamentoSimulationCFG.isEnableCheck()) {
             accreditamentoSimSRV.runSimulation(dto.getIdDoc());
+        }
 
         EdsTraceResponseDTO response;
 
         if (dto.getEdsDPOperation().equals(PUBLISH)) {
-            response = edsClient.sendPublicationData(dto, priority, dto.getDestination());
+            response = edsClient.sendPublicationData(dto, dto.getDestination());
         } else {
             response = edsClient.sendReplaceData(dto);
         }
