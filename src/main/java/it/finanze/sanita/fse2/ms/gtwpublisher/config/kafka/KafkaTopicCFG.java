@@ -32,58 +32,53 @@ public class KafkaTopicCFG {
     @Autowired
     private ProfileUtility profileUtility;
 
-	/**
-	 * Topic.
-	 */
-	@Value("${kafka.indexer-publisher.topic}")
-	private String indexerPublisherTopic;
+    /**
+     * Topic.
+     */
+    @Value("${kafka.indexer-publisher.topic}")
+    private String indexerPublisherTopic;
 
-	/**
-	 * Dead letter topic.
-	 */
-	@Value("${kafka.indexer-publisher.deadletter.topic}")
-	private String indexerPublisherDeadLetterTopic;
+    /**
+     * Dead letter topic.
+     */
+    @Value("${kafka.indexer-publisher.deadletter.topic}")
+    private String indexerPublisherDeadLetterTopic;
 
-	/**
-	 * Topic.
-	 */
-	@Value("${kafka.dispatcher-publisher.base-topic}")
-	private String dispatcherPublisherTopic;
+    /**
+     * Topic.
+     */
+    @Value("${kafka.dispatcher-publisher.base-topic}")
+    private String dispatcherPublisherTopic;
 
-	/**
-	 * Dead letter topic.
-	 */
-	@Value("${kafka.dispatcher-publisher.deadletter.topic}")
-	private String dispatcherPublisherDeadLetterTopic;
+    /**
+     * Dead letter topic.
+     */
+    @Value("${kafka.dispatcher-publisher.deadletter.topic}")
+    private String dispatcherPublisherDeadLetterTopic;
 
-	/**
-	 * Status Manager topic.
-	 */
-	@Value("${kafka.statusmanager.topic}")
-	private String statusManagerTopic;
+    /**
+     * Status Manager topic.
+     */
+    @Value("${kafka.statusmanager.topic}")
+    private String statusManagerTopic;
 
-
-    @Value("${kafka.self-publisher.topic}")
+    @Value("${kafka.udp-publisher.topic}")
     private String selfPublisherTopic;
 
-    @Value("${kafka.self-publisher.deadletter.topic}")
+    @Value("${kafka.udp-publisher.deadletter.topic}")
     private String selfPublisherDeadLetterTopic;
-
 
     @PostConstruct
     public void afterInit() {
         if (profileUtility.isTestProfile()) {
-			this.indexerPublisherTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherTopic;
-			this.indexerPublisherDeadLetterTopic =
-					Constants.Profile.TEST_PREFIX + this.indexerPublisherDeadLetterTopic;
-			this.dispatcherPublisherTopic =
-					Constants.Profile.TEST_PREFIX + this.dispatcherPublisherTopic;
+            this.indexerPublisherTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherTopic;
+            this.indexerPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherDeadLetterTopic;
+            this.dispatcherPublisherTopic = Constants.Profile.TEST_PREFIX + this.dispatcherPublisherTopic;
             this.dispatcherPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX
-					+ this.dispatcherPublisherDeadLetterTopic;
-			this.statusManagerTopic = Constants.Profile.TEST_PREFIX + this.statusManagerTopic;
-			this.selfPublisherTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherTopic;
-			this.selfPublisherDeadLetterTopic =
-					Constants.Profile.TEST_PREFIX + this.selfPublisherDeadLetterTopic;
+                    + this.dispatcherPublisherDeadLetterTopic;
+            this.statusManagerTopic = Constants.Profile.TEST_PREFIX + this.statusManagerTopic;
+            this.selfPublisherTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherTopic;
+            this.selfPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherDeadLetterTopic;
         }
     }
 }
