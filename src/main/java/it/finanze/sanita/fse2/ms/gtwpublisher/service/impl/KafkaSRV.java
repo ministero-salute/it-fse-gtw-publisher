@@ -79,11 +79,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
     private String msName;
 
     @Override
-    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic}'}",
-            clientIdPrefix = "#{'${kafka.consumer.indexer.client-id}'}",
-            containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory",
-            autoStartup = "${event.topic.auto.start}",
-            groupId = "#{'${kafka.consumer.group-id-indexer}'}")
+    @KafkaListener(topics = "#{'${kafka.indexer-publisher.topic}'}", clientIdPrefix = "#{'${kafka.consumer.indexer.client-id}'}", containerFactory = "kafkaIndexerListenerDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-indexer}'}")
     public void basicListenerIndexer(ConsumerRecord<String, String> cr,
             @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
         log.info("Processing Kafka Event: {}", cr.key());
@@ -91,7 +87,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
     }
 
     @Override
-    @KafkaListener(topics = "#{'${kafka.self-publisher.topic}'}", clientIdPrefix = "#{'${kafka.consumer.client-id-self-publisher}'}", containerFactory = "kafkaSelfPublisherDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-self-publisher}'}")
+    @KafkaListener(topics = "#{'${kafka.udp-publisher.topic}'}", clientIdPrefix = "#{'${kafka.consumer.client-id-self-publisher}'}", containerFactory = "kafkaSelfPublisherDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-self-publisher}'}")
     public void listenerSelfPublisher(ConsumerRecord<String, String> cr,
             @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
         log.info("Listening message from self publisher...");
