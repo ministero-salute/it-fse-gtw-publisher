@@ -16,9 +16,6 @@ import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.BLOCK
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.BLOCKING_ERROR_MAX_RETRY;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum.SUCCESS;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum.DESERIALIZE;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.HIGH;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.LOW;
-import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum.MEDIUM;
 import static it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum.PUBLISH;
 
 import java.util.Date;
