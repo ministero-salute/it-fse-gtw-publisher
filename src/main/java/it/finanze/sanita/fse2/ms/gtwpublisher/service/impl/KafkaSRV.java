@@ -164,7 +164,10 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                 }
                 // Quit flag
                 exit = true;
-                sendSelfPublisherMessage(req);
+
+                if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
+                    sendSelfPublisherMessage(req);
+                }
 
             } catch (Exception e) {
                 // Assign
