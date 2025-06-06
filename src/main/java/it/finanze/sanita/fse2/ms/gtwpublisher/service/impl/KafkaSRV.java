@@ -83,7 +83,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
     public void basicListenerIndexer(ConsumerRecord<String, String> cr,
             @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
         log.info("Processing Kafka Event: {}", cr.key());
-        loop(cr, (req) -> publishAndReplace(req), delivery);
+        loop(cr, (req) -> publishAndReplace(req), delivery,DestinationEnum.SEND_TO_UAR);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
     public void listenerSelfPublisher(ConsumerRecord<String, String> cr,
             @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
         log.info("Listening message from self publisher...");
-        loop(cr, (req) -> publishAndReplace(req), delivery);
+        loop(cr, (req) -> publishAndReplace(req), delivery,DestinationEnum.SEND_TO_UDP);
     }
 
     private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto) {
@@ -112,7 +112,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
     }
 
     private void loop(ConsumerRecord<String, String> cr, ClientCallback<IndexerValueDTO, EdsTraceResponseDTO> cb,
-            int delivery) throws Exception {
+            int delivery,DestinationEnum dest) throws Exception {
 
         // ====================
         // Deserialize request
@@ -141,14 +141,6 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         // ====================
         Exception ex = new Exception("Errore generico durante l'invocazione del client di eds");
 
-        // Check if there is a specific destination
-        DestinationEnum dest = DestinationEnum.SEND_TO_UAR;
-        if (topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
-            // If it comes from the self publisher topic, it means the message is in
-            // re-processing phase
-            dest = DestinationEnum.SEND_TO_UDP;
-        }
-
         EventTypeEnum eventType = EventTypeEnum.getEventTypeFromDestination(dest.name());
         req.setDestination(dest);
         for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
@@ -157,17 +149,16 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                 EdsTraceResponseDTO res = cb.request(req);
                 // Everything has been resolved
                 if (Boolean.TRUE.equals(res.getEsito())) {
-
                     sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
+                    
+                    if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
+                        sendSelfPublisherMessage(req);
+                    }
                 } else {
                     throw new BlockingEdsException(res.getMessageError());
                 }
                 // Quit flag
                 exit = true;
-
-                if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
-                    sendSelfPublisherMessage(req);
-                }
 
             } catch (Exception e) {
                 // Assign
