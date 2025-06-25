@@ -45,18 +45,6 @@ public class KafkaTopicCFG {
     private String indexerPublisherDeadLetterTopic;
 
     /**
-     * Topic.
-     */
-    @Value("${kafka.dispatcher-publisher.base-topic}")
-    private String dispatcherPublisherTopic;
-
-    /**
-     * Dead letter topic.
-     */
-    @Value("${kafka.dispatcher-publisher.deadletter.topic}")
-    private String dispatcherPublisherDeadLetterTopic;
-
-    /**
      * Status Manager topic.
      */
     @Value("${kafka.statusmanager.topic}")
@@ -73,9 +61,6 @@ public class KafkaTopicCFG {
         if (profileUtility.isTestProfile()) {
             this.indexerPublisherTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherTopic;
             this.indexerPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherDeadLetterTopic;
-            this.dispatcherPublisherTopic = Constants.Profile.TEST_PREFIX + this.dispatcherPublisherTopic;
-            this.dispatcherPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX
-                    + this.dispatcherPublisherDeadLetterTopic;
             this.statusManagerTopic = Constants.Profile.TEST_PREFIX + this.statusManagerTopic;
             this.selfPublisherTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherTopic;
             this.selfPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherDeadLetterTopic;
