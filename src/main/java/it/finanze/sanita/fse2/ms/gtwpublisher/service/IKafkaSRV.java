@@ -30,6 +30,6 @@ public interface IKafkaSRV {
     void sendStatusMessage(String workflowInstanceId, EventTypeEnum eventType, EventStatusEnum eventStatus,
             String exception);
 
-    void listenerSelfPublisher(ConsumerRecord<String, String> cr, int delivery) throws Exception;
+//    void listenerSelfPublisher(ConsumerRecord<String, String> cr, int delivery) throws Exception;
 
 }
