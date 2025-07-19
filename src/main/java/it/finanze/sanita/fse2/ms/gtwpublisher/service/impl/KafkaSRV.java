@@ -85,14 +85,14 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         log.info("Processing Kafka Event: {}", cr.key());
         loop(cr, (req) -> publishAndReplace(req), delivery,DestinationEnum.SEND_TO_UAR);
     }
-//
-//    @Override
-//    @KafkaListener(topics = "#{'${kafka.udp-publisher.topic}'}", clientIdPrefix = "#{'${kafka.consumer.client-id-self-publisher}'}", containerFactory = "kafkaSelfPublisherDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-self-publisher}'}")
-//    public void listenerSelfPublisher(ConsumerRecord<String, String> cr,
-//            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-//        log.info("Listening message from self publisher...");
+
+    @Override
+    @KafkaListener(topics = "#{'${kafka.udp-publisher.topic}'}", clientIdPrefix = "#{'${kafka.consumer.client-id-self-publisher}'}", containerFactory = "kafkaSelfPublisherDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-self-publisher}'}")
+    public void listenerSelfPublisher(ConsumerRecord<String, String> cr,
+            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
+        log.info("Listening message from self publisher...");
 //        loop(cr, (req) -> publishAndReplace(req), delivery,DestinationEnum.SEND_TO_UDP);
-//    }
+    }
 
     private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto) {
 
@@ -151,9 +151,9 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                 if (Boolean.TRUE.equals(res.getEsito())) {
                     sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
                     
-//                    if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
-//                        sendSelfPublisherMessage(req);
-//                    }
+                    if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
+                        sendSelfPublisherMessage(req);
+                    }
                 } else {
                     throw new BlockingEdsException(res.getMessageError());
                 }
