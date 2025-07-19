@@ -151,9 +151,9 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                 if (Boolean.TRUE.equals(res.getEsito())) {
                     sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
                     
-                    if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
-                        sendSelfPublisherMessage(req);
-                    }
+//                    if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
+//                        sendSelfPublisherMessage(req);
+//                    }
                 } else {
                     throw new BlockingEdsException(res.getMessageError());
                 }
