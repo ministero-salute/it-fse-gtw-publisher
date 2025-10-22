@@ -50,20 +50,12 @@ public class KafkaTopicCFG {
     @Value("${kafka.statusmanager.topic}")
     private String statusManagerTopic;
 
-    @Value("${kafka.udp-publisher.topic}")
-    private String selfPublisherTopic;
-
-    @Value("${kafka.udp-publisher.deadletter.topic}")
-    private String selfPublisherDeadLetterTopic;
-
     @PostConstruct
     public void afterInit() {
         if (profileUtility.isTestProfile()) {
             this.indexerPublisherTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherTopic;
             this.indexerPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX + this.indexerPublisherDeadLetterTopic;
             this.statusManagerTopic = Constants.Profile.TEST_PREFIX + this.statusManagerTopic;
-            this.selfPublisherTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherTopic;
-            this.selfPublisherDeadLetterTopic = Constants.Profile.TEST_PREFIX + this.selfPublisherDeadLetterTopic;
         }
     }
 }
