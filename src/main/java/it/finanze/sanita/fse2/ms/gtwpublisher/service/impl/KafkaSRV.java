@@ -85,14 +85,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         log.info("Processing Kafka Event: {}", cr.key());
         loop(cr, (req) -> publishAndReplace(req), delivery,DestinationEnum.SEND_TO_UAR);
     }
-//
-//    @Override
-//    @KafkaListener(topics = "#{'${kafka.udp-publisher.topic}'}", clientIdPrefix = "#{'${kafka.consumer.client-id-self-publisher}'}", containerFactory = "kafkaSelfPublisherDeadLetterContainerFactory", autoStartup = "${event.topic.auto.start}", groupId = "#{'${kafka.consumer.group-id-self-publisher}'}")
-//    public void listenerSelfPublisher(ConsumerRecord<String, String> cr,
-//            @Header(KafkaHeaders.DELIVERY_ATTEMPT) int delivery) throws Exception {
-//        log.info("Listening message from self publisher...");
-//        loop(cr, (req) -> publishAndReplace(req), delivery,DestinationEnum.SEND_TO_UDP);
-//    }
+
 
     private EdsTraceResponseDTO publishAndReplace(IndexerValueDTO dto) {
 
@@ -150,10 +143,6 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                 // Everything has been resolved
                 if (Boolean.TRUE.equals(res.getEsito())) {
                     sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
-                    
-//                    if (!topicCFG.getSelfPublisherTopic().equals(cr.topic())) {
-//                        sendSelfPublisherMessage(req);
-//                    }
                 } else {
                     throw new BlockingEdsException(res.getMessageError());
                 }
@@ -193,17 +182,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         }
 
     }
-
-    public void sendSelfPublisherMessage(final IndexerValueDTO request) {
-        try {
-            String valueJson = StringUtility.toJSONJackson(request);
-            sendMessage(topicCFG.getSelfPublisherTopic(), request.getDestination().name(), valueJson);
-        } catch (Exception e) {
-            log.error("Error while send message on self publisher : ", e);
-            throw new BusinessException(e);
-        }
-    }
-
+ 
     @Override
     public void sendStatusMessage(final String workflowInstanceId, final EventTypeEnum eventType,
             final EventStatusEnum eventStatus, String exception) {
