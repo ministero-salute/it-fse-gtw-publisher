@@ -184,35 +184,6 @@ public class KafkaConsumerIndexerCFG {
         return factory;
     }
 
-    /**
-     * Factory with dead letter configuration.
-     * 
-     * @return factory
-     */
-    @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaSelfPublisherDeadLetterContainerFactory(
-            final @Qualifier("notxkafkadeadtemplate") KafkaTemplate<Object, Object> deadLetterKafkaTemplate) {
-
-        ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactorySelfPublisher());
-        factory.getContainerProperties().setDeliveryAttemptHeader(true);
-        // Definition topic name deadLetter
-        log.debug("TOPIC definition: " + kafkaTopicCFG.getSelfPublisherDeadLetterTopic());
-        DeadLetterPublishingRecoverer dlpr = new DeadLetterPublishingRecoverer(deadLetterKafkaTemplate,
-                (record, ex) -> new TopicPartition(kafkaTopicCFG.getSelfPublisherDeadLetterTopic(), -1));
-
-        // Set classificazione errori da gestire per la deadLetter.
-        DefaultErrorHandler sceh = new DefaultErrorHandler(dlpr,
-                new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, FixedBackOff.UNLIMITED_ATTEMPTS));
-
-        log.debug("Kafka dead letter classification");
-        setClassification(sceh);
-
-        // da eliminare se non si volesse gestire la dead letter
-        factory.setCommonErrorHandler(sceh);
-
-        return factory;
-    }
 
     @Bean
     public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactoryIndexer() {
