@@ -78,12 +78,10 @@
 				<producerConfig>sasl.jaas.config=${kafka.properties.sasl.jaas.config}
 				</producerConfig>
 
-				<springProfile name="default">
-					<producerConfig>ssl.truststore.location=${kafka.properties.ssl.truststore.location}
-					</producerConfig>
-					<producerConfig>ssl.truststore.password=${kafka.properties.ssl.truststore.password}
-					</producerConfig>
-				</springProfile>
+				<producerConfig>ssl.truststore.location=${kafka.properties.ssl.truststore.location}
+				</producerConfig>
+				<producerConfig>ssl.truststore.password=${kafka.properties.ssl.truststore.password}
+				</producerConfig>
 	</appender>
 
 	<logger name="kafka-logger" level="INFO" additivity="false">

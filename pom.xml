@@ -12,7 +12,7 @@
 	
 	<groupId>it.finanze.sanita.fse2</groupId>
 	<artifactId>gtw-publisher-ms</artifactId>
-	<version>1.1.1</version> 
+	<version>1.1.2</version> 
 	<name>gtw-publisher-ms</name>
 	<description>Gateway Publisher FSE</description>
 	<properties>
