@@ -40,5 +40,7 @@ public class LogDTO {
 	private String microservice_name;
 
 	private String workflow_instance_id;
+
+	private String idDocumento;
 	
 }

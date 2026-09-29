@@ -33,8 +33,12 @@ public class LoggerHelper {
     @Value("${spring.application.name}")
     private String microserviceName;
 
-    public void sendToUar(String workflowInstanceId, EventStatusEnum status, String message,
+    public void sendToUar(String workflowInstanceId, String idDocumento, EventStatusEnum status, String message,
             Date startDate, String errorDescription) {
+        if (!kafkaLogEnable) {
+            return;
+        }
+
         LogDTO logDTO = LogDTO.builder()
                 .message(message)
                 .operation(OperationLogEnum.SEND_TO_UAR.getCode())
@@ -45,10 +49,9 @@ public class LoggerHelper {
                 .op_error_description(errorDescription)
                 .microservice_name(microserviceName)
                 .workflow_instance_id(workflowInstanceId)
+                .idDocumento(idDocumento)
                 .build();
 
-        if (kafkaLogEnable) {
-            kafkaLog.info(StringUtility.toJSON(logDTO));
-        }
+        kafkaLog.info(StringUtility.toJSON(logDTO));
     }
 }

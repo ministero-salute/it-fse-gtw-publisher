@@ -149,7 +149,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                 // Everything has been resolved
                 if (Boolean.TRUE.equals(res.getEsito())) {
                     sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
-                    emitStructuredLog(wif, eventType, SUCCESS, "Document sent to UAR", startDate, null);
+                    emitStructuredLog(wif, req.getIdDoc(), eventType, SUCCESS, "Document sent to UAR", startDate, null);
                 } else {
                     throw new BlockingEdsException(res.getMessageError());
                 }
@@ -171,7 +171,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                     if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
                         // Send to kafka
                         sendStatusMessage(wif, eventType, status, e.getMessage());
-                        emitStructuredLog(wif, eventType, status, "Unable to send document to UAR", startDate,
+                        emitStructuredLog(wif, req.getIdDoc(), eventType, status, "Unable to send document to UAR", startDate,
                                 e.getMessage());
                     }
                     // We are going re-process it
@@ -186,7 +186,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
             Date startDate = new Date();
             sendStatusMessage(wif, eventType, BLOCKING_ERROR_MAX_RETRY,
                     "Massimo numero di retry raggiunto: " + ex.getMessage());
-            emitStructuredLog(wif, eventType, BLOCKING_ERROR_MAX_RETRY, "Unable to send document to UAR",
+            emitStructuredLog(wif, req.getIdDoc(), eventType, BLOCKING_ERROR_MAX_RETRY, "Unable to send document to UAR",
                     startDate, ex.getMessage());
 
             throw new BlockingEdsException(ex.getMessage());
@@ -195,13 +195,13 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
     }
 
-    private void emitStructuredLog(String workflowInstanceId, EventTypeEnum eventType, EventStatusEnum status,
+    private void emitStructuredLog(String workflowInstanceId, String idDocumento, EventTypeEnum eventType, EventStatusEnum status,
             String message, Date startDate, String errorDescription) {
         if (eventType != EventTypeEnum.SEND_TO_UAR) {
             return;
         }
         try {
-            loggerHelper.sendToUar(workflowInstanceId, status, message, startDate, errorDescription);
+            loggerHelper.sendToUar(workflowInstanceId, idDocumento, status, message, startDate, errorDescription);
         } catch (Exception ex) {
             log.warn("Unable to emit SEND_TO_UAR structured log for workflow instance id {}", workflowInstanceId, ex);
         }

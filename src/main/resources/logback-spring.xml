@@ -50,11 +50,6 @@
 		</encoder>
 	</appender>
 
-	<logger name="kafka-logger" level="${log.elastic.level}"
-		additivity="false">
-		<appender-ref ref="KAFKA" />
-	</logger>
-
 	<appender name="KAFKA"
 		class="it.finanze.sanita.fse2.ms.gtwpublisher.logging.KafkaAppender">
 				<encoder
@@ -90,6 +85,10 @@
 					</producerConfig>
 				</springProfile>
 	</appender>
+
+	<logger name="kafka-logger" level="INFO" additivity="false">
+		<appender-ref ref="KAFKA" />
+	</logger>
 
 
 	<appender name="OpenTelemetry"
