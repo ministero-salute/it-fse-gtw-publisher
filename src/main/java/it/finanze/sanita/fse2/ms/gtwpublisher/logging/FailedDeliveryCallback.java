@@ -1,4 +1,3 @@
-
 /*
  * SPDX-License-Identifier: AGPL-3.0-or-later
  * 
@@ -10,31 +9,10 @@
  * 
  * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-package it.finanze.sanita.fse2.ms.gtwpublisher.enums;
+package it.finanze.sanita.fse2.ms.gtwpublisher.logging;
 
-
-public enum EventTypeEnum {
-
-	SEND_TO_UAR("SEND_TO_UAR"),
-	DESERIALIZE("DESERIALIZE");
-
-	private final String name;
-
-	EventTypeEnum(String inName) {
-		name = inName;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public static EventTypeEnum getEventTypeFromDestination(String destination) {
-		for (EventTypeEnum eventType : EventTypeEnum.values()) {
-			if (eventType.name().equalsIgnoreCase(destination)) {
-				return eventType;
-			}
-		}
-		throw new IllegalArgumentException("No enum constant for string: " + destination);
-	}
-
+public interface FailedDeliveryCallback<E> {
+	
+    void onFailedDelivery(E evt, Throwable throwable);
+    
 }

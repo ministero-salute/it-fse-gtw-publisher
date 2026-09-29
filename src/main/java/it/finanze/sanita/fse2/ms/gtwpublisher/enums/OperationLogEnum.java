@@ -17,7 +17,7 @@ import lombok.Getter;
 @Getter
 public enum OperationLogEnum implements ILogEnum {
 
-	SEND_EDS("TRAS-CDA2", "Invio a EDS");
+	SEND_TO_UAR("SEND-TO-UAR", "Invio documento a UAR");
 
 	private String code;
 
@@ -29,4 +29,3 @@ public enum OperationLogEnum implements ILogEnum {
 	}
 
 }
-

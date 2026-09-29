@@ -94,47 +94,6 @@ public class KafkaConsumerIndexerCFG {
     }
 
     /**
-     * Configurazione consumer.
-     * 
-     * @return configurazione consumer
-     */
-    @Bean
-    public Map<String, Object> consumerConfigsSelfPublisher() {
-        Map<String, Object> props = new HashMap<>();
-
-        props.put(ConsumerConfig.CLIENT_ID_CONFIG, kafkaConsumerPropCFG.getClientIdSelfPublisher());
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaConsumerPropCFG.getConsumerBootstrapServers());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaConsumerPropCFG.getConsumerGroupIdSelfPublisher());
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, kafkaConsumerPropCFG.getConsumerKeyDeserializer());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, kafkaConsumerPropCFG.getConsumerValueDeserializer());
-        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, kafkaConsumerPropCFG.getIsolationLevel());
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, kafkaConsumerPropCFG.getAutoCommit());
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, kafkaConsumerPropCFG.getAutoOffsetReset());
-
-        if (!StringUtility.isNullOrEmpty(kafkaProps.getProtocol())) {
-            props.put("security.protocol", kafkaProps.getProtocol());
-        }
-
-        if (!StringUtility.isNullOrEmpty(kafkaProps.getMechanism())) {
-            props.put("sasl.mechanism", kafkaProps.getMechanism());
-        }
-
-        if (!StringUtility.isNullOrEmpty(kafkaProps.getConfigJaas())) {
-            props.put("sasl.jaas.config", kafkaProps.getConfigJaas());
-        }
-
-        if (!StringUtility.isNullOrEmpty(kafkaProps.getTrustoreLocation())) {
-            props.put("ssl.truststore.location", kafkaProps.getTrustoreLocation());
-        }
-
-        if (!StringUtility.isNullOrEmpty(String.valueOf(kafkaProps.getTrustorePassword()))) {
-            props.put("ssl.truststore.password", String.valueOf(kafkaProps.getTrustorePassword()));
-        }
-
-        return props;
-    }
-
-    /**
      * Consumer factory.
      * 
      * @return factory
@@ -142,17 +101,6 @@ public class KafkaConsumerIndexerCFG {
     @Bean
     public ConsumerFactory<String, String> consumerFactoryIndexer() {
         return new DefaultKafkaConsumerFactory<>(consumerConfigsIndexer());
-    }
-
-    /**
-     * Consumer factory.
-     * 
-     * @return factory
-     */
-    @Bean
-    public ConsumerFactory<String, String> consumerFactorySelfPublisher() {
-        // TOOD: modifica
-        return new DefaultKafkaConsumerFactory<>(consumerConfigsSelfPublisher());
     }
 
     /**

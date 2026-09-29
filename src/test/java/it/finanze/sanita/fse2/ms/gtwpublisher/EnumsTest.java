@@ -79,8 +79,8 @@ class EnumsTest {
     @Test
     @DisplayName("testOperationLogEnum")
     void testOperationLogEnum() {
-    	String code = OperationLogEnum.SEND_EDS.getCode();
-    	assertEquals(code, OperationLogEnum.SEND_EDS.getCode());
+        String code = "SEND-TO-UAR";
+        assertEquals(code, OperationLogEnum.SEND_TO_UAR.getCode());
     }
     
     @Test

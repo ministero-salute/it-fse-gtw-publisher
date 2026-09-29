@@ -54,12 +54,6 @@ public class KafkaConsumerPropertiesCFG {
     @Value("${kafka.consumer.group-id-dispatcher}")
     private String consumerGroupIdDispatcher;
 
-    @Value("${kafka.consumer.client-id-self-publisher}")
-    private String clientIdSelfPublisher;
-
-    @Value("${kafka.consumer.group-id-self-publisher}")
-    private String consumerGroupIdSelfPublisher;
-
     /**
      * Consumer key deserializer.
      */

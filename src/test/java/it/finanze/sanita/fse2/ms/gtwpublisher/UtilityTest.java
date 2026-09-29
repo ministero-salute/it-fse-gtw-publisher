@@ -38,7 +38,6 @@ import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.DocumentResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.dto.response.ResponseDTO;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.DestinationEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.PriorityTypeEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ProcessorOperationEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.gtwpublisher.utility.JsonUtility;

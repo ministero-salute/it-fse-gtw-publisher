@@ -36,5 +36,9 @@ public class LogDTO {
 	private String op_error_description;
 
 	private String op_issuer;
+
+	private String microservice_name;
+
+	private String workflow_instance_id;
 	
 }

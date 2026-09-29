@@ -30,6 +30,8 @@ import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
+import it.finanze.sanita.fse2.ms.gtwpublisher.logging.LoggerHelper;
+
 import com.google.gson.Gson;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.client.IEdsClient;
@@ -74,6 +76,9 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
 
     @Autowired
     private AccreditationSimulationCFG accreditamentoSimulationCFG;
+
+    @Autowired
+    private LoggerHelper loggerHelper;
 
     @Value("${spring.application.name}")
     private String msName;
@@ -137,12 +142,14 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         EventTypeEnum eventType = EventTypeEnum.getEventTypeFromDestination(dest.name());
         req.setDestination(dest);
         for (int i = 0; i <= kafkaConsumerPropCFG.getNRetry() && !exit; ++i) {
+            Date startDate = new Date();
             try {
                 // Execute request
                 EdsTraceResponseDTO res = cb.request(req);
                 // Everything has been resolved
                 if (Boolean.TRUE.equals(res.getEsito())) {
                     sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
+                    emitStructuredLog(wif, eventType, SUCCESS, "Document sent to UAR", startDate, null);
                 } else {
                     throw new BlockingEdsException(res.getMessageError());
                 }
@@ -164,6 +171,8 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                     if (delivery <= KafkaProducerCFG.MAX_ATTEMPT) {
                         // Send to kafka
                         sendStatusMessage(wif, eventType, status, e.getMessage());
+                        emitStructuredLog(wif, eventType, status, "Unable to send document to UAR", startDate,
+                                e.getMessage());
                     }
                     // We are going re-process it
                     throw e;
@@ -174,13 +183,28 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         // We didn't exit properly from the loop,
         // We reached the max amount of retries
         if (!exit) {
+            Date startDate = new Date();
             sendStatusMessage(wif, eventType, BLOCKING_ERROR_MAX_RETRY,
                     "Massimo numero di retry raggiunto: " + ex.getMessage());
+            emitStructuredLog(wif, eventType, BLOCKING_ERROR_MAX_RETRY, "Unable to send document to UAR",
+                    startDate, ex.getMessage());
 
             throw new BlockingEdsException(ex.getMessage());
 
         }
 
+    }
+
+    private void emitStructuredLog(String workflowInstanceId, EventTypeEnum eventType, EventStatusEnum status,
+            String message, Date startDate, String errorDescription) {
+        if (eventType != EventTypeEnum.SEND_TO_UAR) {
+            return;
+        }
+        try {
+            loggerHelper.sendToUar(workflowInstanceId, status, message, startDate, errorDescription);
+        } catch (Exception ex) {
+            log.warn("Unable to emit SEND_TO_UAR structured log for workflow instance id {}", workflowInstanceId, ex);
+        }
     }
  
     @Override
