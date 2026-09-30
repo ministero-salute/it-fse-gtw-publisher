@@ -22,24 +22,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 import it.finanze.sanita.fse2.ms.gtwpublisher.config.Constants;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.AccreditamentoPrefixEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ErrorLogEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventSourceEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventStatusEnum;
 import it.finanze.sanita.fse2.ms.gtwpublisher.enums.EventTypeEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.OperationLogEnum;
-import it.finanze.sanita.fse2.ms.gtwpublisher.enums.ResultLogEnum;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ComponentScan(basePackages = {Constants.ComponentScan.BASE})
 @ActiveProfiles(Constants.Profile.TEST)
 class EnumsTest {
-
-    @Test
-    @DisplayName("testErrorLogEnums")
-    void testErrorLogEnums() {
-        String code = "KO_EDS";
-        assertEquals(code, ErrorLogEnum.KO_EDS.getCode());
-    }
 
     @Test
     @DisplayName("testEventTypeEnums")
@@ -56,13 +46,6 @@ class EnumsTest {
     }
 
     @Test
-    @DisplayName("testResultLogEnum")
-    void testResultLogEnum() {
-        String code = ResultLogEnum.KO.getCode();
-        assertEquals(code, ResultLogEnum.KO.getCode());
-    }
-    
-    @Test
     @DisplayName("testEventSourceEnum")
     void testEventSourceEnum() {
         String dispatcherName = EventSourceEnum.DISPATCHER.getName();
@@ -74,13 +57,6 @@ class EnumsTest {
         String indexerdispatcherDesc = EventSourceEnum.INDEXER.getDescription();
         assertEquals(indexerName, EventSourceEnum.INDEXER.getName());
         assertEquals(indexerdispatcherDesc, EventSourceEnum.INDEXER.getDescription());
-    }
-    
-    @Test
-    @DisplayName("testOperationLogEnum")
-    void testOperationLogEnum() {
-        String code = "SEND-TO-UAR";
-        assertEquals(code, OperationLogEnum.SEND_TO_UAR.getCode());
     }
     
     @Test
