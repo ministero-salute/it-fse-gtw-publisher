@@ -12,7 +12,7 @@
 	
 	<groupId>it.finanze.sanita.fse2</groupId>
 	<artifactId>gtw-publisher-ms</artifactId>
-	<version>1.1.3</version> 
+	<version>1.1.4</version> 
 	<name>gtw-publisher-ms</name>
 	<description>Gateway Publisher FSE</description>
 	<properties>
@@ -28,7 +28,6 @@
 		<sonar.organization>ministero-salute</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<sonar.exclusions>src/main/java/it/finanze/sanita/fse2/ms/gtwpublisher/logging/**/*.*</sonar.exclusions>
-		<logback.version>1.5.16</logback.version>
 	</properties>
 
 	<dependencies>
