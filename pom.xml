@@ -12,7 +12,7 @@
 	
 	<groupId>it.finanze.sanita.fse2</groupId>
 	<artifactId>gtw-publisher-ms</artifactId>
-	<version>1.1.4</version> 
+	<version>1.1.5</version> 
 	<name>gtw-publisher-ms</name>
 	<description>Gateway Publisher FSE</description>
 	<properties>
@@ -61,18 +61,6 @@
 		    <groupId>org.springdoc</groupId>
 		    <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 		    <version>2.8.13</version>
-		</dependency>
-
-		<!-- LOGBACK JSON -->
-		<dependency>
-			<groupId>ch.qos.logback.contrib</groupId>
-			<artifactId>logback-json-classic</artifactId>
-			<version>0.1.5</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback.contrib</groupId>
-			<artifactId>logback-jackson</artifactId>
-			<version>0.1.5</version>
 		</dependency>
 
 		<!-- DEVTOOL -->
