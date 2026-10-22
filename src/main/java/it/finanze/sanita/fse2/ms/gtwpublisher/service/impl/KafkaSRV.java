@@ -132,7 +132,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
         // ====================
         // Retry iterations
         // ====================
-        Exception ex = new Exception("Errore generico durante l'invocazione del client di eds");
+        Exception ex = new Exception("Errore generico durante l'invocazione della componente Broker di eds");
 
         EventTypeEnum eventType = EventTypeEnum.getEventTypeFromDestination(dest.name());
         req.setDestination(dest);
@@ -142,7 +142,7 @@ public class KafkaSRV extends KafkaAbstractSRV implements IKafkaSRV {
                 EdsTraceResponseDTO res = cb.request(req);
                 // Everything has been resolved
                 if (Boolean.TRUE.equals(res.getEsito())) {
-                    sendStatusMessage(wif, eventType, SUCCESS, new Gson().toJson(res));
+                    sendStatusMessage(wif, eventType, SUCCESS, "Messaggio inviato correttamente alla componente Broker");
                 } else {
                     throw new BlockingEdsException(res.getMessageError());
                 }
