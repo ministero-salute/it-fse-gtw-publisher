@@ -40,6 +40,24 @@ Please take the time to read and consider the other repositories in full before 
 - <a href="https://github.com/ministero-salute/it-fse-landing">it-fse-landing</a> - Landing page of all FSE 2.0 repositories
 
 
+## Isolation tests
+
+With Java 21 and Maven, run the opt-in, broker-free suite:
+
+```sh
+mvn -PISOLATION clean test
+```
+
+JUnit `ISOLATION` tags are excluded from ordinary Maven test runs. The profile selects
+only those tags; minimal Spring contexts use the `ISOLATION` Spring profile without
+starting the application, Kafka listeners, or external services. Tests exercise real
+publisher/retry/status logic, EDS request mapping and failures, health/controller
+behavior, utilities, and Kafka configuration. Kafka templates, admin-client creation,
+and HTTP transport are mocked. Factory tests never create producers or consumers.
+
+JaCoCo HTML/XML reports are generated at `target/site/jacoco/`.
+Existing integration tests remain unchanged.
+
 # Contributing
 Contributions are most welcome. Before proceeding, please read the [Code of Conduct](./CODE_OF_CONDUCT.md) for guidance on how to approach the community and create a positive environment. Additionally, please read our [CONTRIBUTING](./CONTRIBUTING.md) file, which contains guidance on ensuring a smooth contribution process.
 
